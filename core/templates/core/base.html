@@ -1,0 +1,136 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>{% block title %} {% endblock %} | Roughy.io</title>
+        <meta name="description" content="" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+	</head>
+
+	<body class="bg-base-dark">
+        <nav class="py-6 px-6 flex justify-between items-center">
+            <a href="/" class="text-3xl font-semibold text-white mx-6">Crypt</a>
+            <div class="flex-1 space-x-6 items-center text-center">
+              <a href="{% url 'core:search' %}" class="text-lg font-semibold text-white transition-all hover:text-purple-600">Search</a>
+              <a href="{% url 'core:upload' %}" class="text-lg font-semibold text-white transition-all hover:text-purple-600">Upload</a>
+              <a href="{% url 'core:about' %}" class="text-lg font-semibold text-white transition-all hover:text-purple-600">About US</a>
+            </div>
+            <div class="ml-auto space-x-6">
+              {% if request.user.is_authenticated %}
+              
+                <div x-data="{ open: false }" class="bg-white dark:bg-base-dark w-64  flex justify-center items-center">
+                    <div @click="open = !open" class="relative border-b-4 border-transparent py-3" :class="{'border-indigo-700 transform transition duration-300 ': open}" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100">
+                      <div class="flex justify-center items-center space-x-3 cursor-pointer">
+                        <div class="w-12 h-12 rounded-full overflow-hidden border-2 dark:border-white border-gray-900">
+                          <img src="https://images.unsplash.com/photo-1610397095767-84a5b4736cbd?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80" alt="" class="w-full h-full object-cover">
+                        </div>
+                        <div class="font-semibold dark:text-white text-gray-900 text-lg">
+                          <div class="cursor-pointer">{{request.user}}</div>
+                        </div>
+                      </div>
+                      <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute w-50 px-5 py-3 dark:bg-base-dark bg-base-purple rounded-lg shadow-lg border dark:border-transparent mt-5">
+                        <ul class="space-y-3 dark:text-white">
+                          <li class="font-medium">
+                            <a href="{% url 'core:profile' %}" class="flex items-center transform transition-colors duration-200 border-r-4 border-transparent hover:border-indigo-700">
+                              <div class="mr-3">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                              </div>
+                              Dashboard
+                            </a>
+                          </li>
+                          <hr class="dark:border-gray-700">
+                          <li class="font-medium">
+                            <a href="{% url 'core:logout' %}" class="flex items-center transform transition-colors duration-200 border-r-4 border-transparent hover:border-red-600">
+                              <div class="mr-3 text-red-600">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                              </div>
+                              Logout
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                </div>
+
+              {% else %}
+              <a href="{% url 'core:login' %}" class="text-purple-700 hover:text-white border border-purple-700 hover:bg-purple-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:border-purple-500 dark:text-purple-500 dark:hover:text-white dark:hover:bg-purple-500 dark:focus:ring-purple-800 transition-all duration-300">Login</a>
+              <a href="{% url 'core:signup' %}" class="text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 focus:outline-none dark:focus:ring-purple-800  transition-all duration-300">Signup</a>
+              {% endif %}
+            </div>
+          </nav>
+    <div class="px-6 py-6">
+      <br/>
+      {% if messages %}
+
+      {% for message in messages %}
+      <div id="alert-1" class="flex p-4 mb-4 text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
+        <svg aria-hidden="true" class="flex-shrink-0 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+        </svg>
+        <span class="sr-only">Info</span>
+        <div class="ml-3 text-sm font-medium">
+          {{ message }}
+        </div>
+        <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-blue-50 text-blue-500 rounded-lg focus:ring-2 focus:ring-blue-400 p-1.5 hover:bg-blue-200 inline-flex h-8 w-8 dark:bg-gray-800 dark:text-blue-400 dark:hover:bg-gray-700" aria-label="Close">
+          <span class="sr-only">Close</span>
+          <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+          </svg>
+        </button>
+      </div>
+      <script>
+        // get the close button element
+        const closeButton = document.querySelector('#alert-1 button[aria-label="Close"]');
+      
+        // get the alert element
+        const alertElement = document.querySelector('#alert-1');
+      
+        // add a click event listener to the close button
+        closeButton.addEventListener('click', function() {
+          // hide the alert element
+          alertElement.style.display = 'none';
+        });
+      </script>
+      
+      {% endfor %}
+
+      {% endif %}
+      {% block content %} {% endblock %}
+    </div>
+        
+    <footer class="py-6 px-6 flex justify-between">
+        <div class="w-2/3 pr-10">
+          <h3 class="mb-5 font-semibold text-xl text-purple-600">
+            About
+          </h3>
+          <p class="text-lg text-white">Crypt adalah sprediksi cryptocurrency </p>
+        </div>
+        <div class="w-1/3">
+          <h3 class="mb-5 text-xl font-semibold text-purple-600">
+            Menu
+          </h3>
+          <ul class="space-y-2">
+            <li>
+              <a href="#" class="text-lg text-white hover:text-gray-200">About</a>
+            </li>
+            <li>
+              <a href="#" class="text-lg text-white hover:text-gray-200">Contact</a>
+            </li>
+            <li>
+              <a href="#" class="text-lg text-white hover:text-gray-200">Privacy</a>
+            </li>
+            <li>
+              <a href="#" class="text-lg text-white hover:text-gray-200">Term of use</a>
+            </li>
+          </ul>
+  
+        </div>
+  
+      </footer>
+      <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"></script>
+    </body>
+</html>

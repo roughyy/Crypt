@@ -1,0 +1,24 @@
+{% extends 'core/base.html' %}
+
+{% block title %} Home {% endblock %} 
+
+{% block content %}
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
+<div class="grid grid-cols-2 gap-4 mt-16">
+    <div class="flex flex-col justify-center items-end col-span-1">
+        <h1 class="text-4xl md:text-7xl font-bold text-white leading-snug text-justify md:text-justify">Get ahead of the game <br> with our cryptocurrency <br> price prediction website <br> powered by data</h1>
+    </div>
+    <div class="flex justify-center items-start col-span-1">
+        <lottie-player src="https://assets2.lottiefiles.com/packages/lf20_bgPRxReSyJ.json"  background="transparent"  speed="0.5"  style="width: 400px; height: 400px;"  loop  autoplay></lottie-player>
+    </div>
+</div>
+<div class="my-10 ml-24">
+    <button class="bg-gradient-to-r from-rose-700 to-purple-600 hover:from-purple-600 hover:to-rose-700 hover:text-white text-stone-900 font-bold text-xl md:text-4xl rounded-full py-5 px-6 transition-all duration-500">
+        Get Started
+    </button>
+</div>
+
+  
+  
+{% endblock %}
