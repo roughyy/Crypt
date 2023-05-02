@@ -22,8 +22,18 @@
                 <div class="text-white text-xl mb-5 font-semibold">
                     Welcome
                 </div>
+                {% if form.errors or form.non_field_errors %}
+                    <div class="mb-3 p-3 bg-white text-red-600 rounded-xl border-2 border-red-700">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        {% endfor %}
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
                 <div class="mb-6">
-                    <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Full Name</label>
+                    <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Username</label>
                     {{ form.username }}
                 </div>
                 <div class="mb-6">
@@ -46,17 +56,7 @@
                 </div>
                 <button class="px-5 py-3 rounded-lg w-96 bg-base-red text-white font-semibold">Submit</button>
                 <p class="text-white mt-4">Already have an account?<a href="{% url 'core:login' %}" class="text-base-purple">Click here</a></p>
-            </form>
-            <!-- Masih ga jalan -->
-                {% if form.errors or form.non_field_errors %}
-                    <div class="mb-3 p-6 bg-red-100 rounded-xl">
-                        {% for error in form %}
-                            {{field.error}}
-                        {% endfor %}
-
-                        {{ form.non_field_errors }}
-                    </div>
-                {% endif %} 
+            </form>        
         </div>
         <div class="bg-base-dark w-7/12 flex items-center justify-center">
             <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_jcikwtux.json" background="transparent" speed="0.4" style="width: 800px; height: 800px;" loop autoplay></lottie-player>
