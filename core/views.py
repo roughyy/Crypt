@@ -66,7 +66,6 @@ def about(request):
 
 def search(request):
     import yfinance as yf
-    import json
 
     symbols = (
         "btc-usd",
