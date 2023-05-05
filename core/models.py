@@ -53,9 +53,14 @@ class Cryptocurrencies(models.Model):
     logoImage = models.FileField(upload_to="cryptocurrenciesLogo", null=True)
     categoryId = models.ForeignKey(CoinCategory, on_delete=models.CASCADE)
     lastPrice = models.CharField(max_length=30, null=True)
-    historicalData = models.TextField(null=True)
-    lstmModelId = models.ForeignKey(LSTMModel, on_delete=models.CASCADE, null=True)
-    prophetId = models.ForeignKey(ProphetScore, on_delete=models.CASCADE, null=True)
+    historicalData = models.TextField(null=True, blank=True)
+    predictedData = models.TextField(null=True)
+    lstmModelId = models.ForeignKey(
+        LSTMModel, on_delete=models.CASCADE, blank=True, null=True
+    )
+    prophetId = models.ForeignKey(
+        ProphetScore, on_delete=models.CASCADE, blank=True, null=True
+    )
     updateDateTime = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

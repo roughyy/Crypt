@@ -146,3 +146,14 @@ def upload(request):
 
 def profile(request):
     return render(request, "core/profile.html")
+
+
+# non page function:
+
+
+def populateDatabase(request):
+    return render(request)
+
+
+def cryptocurrenciesDailyUpdate(request):
+    return render(request)
