@@ -82,7 +82,7 @@ def search(request):
         "USDC-USD",
         "XRP-USD",
         "ADA-USD",
-        "Doge-USD",
+        "DOGE-USD",
         "Matic-USD",
         "SOL-USD",
     )
@@ -90,24 +90,19 @@ def search(request):
     try:
         queryset = Cryptocurrencies.objects.all().values()
         for currency in queryset:
-            if currency["symbol"] in symbols:
-                currentPrice = yf.download(currency["symbol"], interval="1m")["Close"][
-                    -1
-                ]
-                Cryptocurrencies.objects.filter(symbol=currency["symbol"]).update(
-                    lastPrice=currentPrice
-                )
-                Cryptocurrencies.objects.filter(symbol=currency["symbol"]).values()
-                historicalData = (
-                    Cryptocurrencies.objects.filter(symbol=currency["symbol"])
-                    .get()
-                    .get_historicalData()
-                )
-                lastPrice = list(historicalData["Close"])
-                lastPrice = lastPrice[-2]
-                currency["PercentChange"] = (
-                    (currentPrice - lastPrice) / lastPrice
-                ) * 100
+            currentPrice = yf.download(currency["symbol"], interval="1m")["Close"][-1]
+            Cryptocurrencies.objects.filter(symbol=currency["symbol"]).update(
+                lastPrice=currentPrice
+            )
+            Cryptocurrencies.objects.filter(symbol=currency["symbol"]).values()
+            historicalData = (
+                Cryptocurrencies.objects.filter(symbol=currency["symbol"])
+                .get()
+                .get_historicalData()
+            )
+            lastPrice = list(historicalData["Close"])
+            lastPrice = lastPrice[-2]
+            currency["PercentChange"] = ((currentPrice - lastPrice) / lastPrice) * 100
         context = {"queryset": queryset}
         return render(request, "core/search.html", context)
 
