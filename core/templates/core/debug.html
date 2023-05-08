@@ -1,0 +1,11 @@
+<!-- in your debug.html template -->
+<form method="post" action="{% url 'core:populate-cryptocurrencies-data' %}">
+    {% csrf_token %}
+    <button type="submit">Populate Cryptocurrencies Data</button>
+  </form>
+  
+  <form method="post" action="{% url 'core:populate-cryptocurrencies-historical-data' %}">
+    {% csrf_token %}
+    <button type="submit">Populate Cryptocurrencies Historical Data</button>
+  </form>
+  

@@ -16,10 +16,26 @@
     <div class="flex w-full h-screen">
       <div class="w-8/12 px-12">
         <div class="text-3xl text-white flex items-center font-semibold"> 
-          <img class="h-9 w-9 inline-flex mr-3" src="{{ info.logoUrl }}">
-          <h1>{{ info.longName }}</h1>
-          <p class="text-2xl ml-10">${{ info.regularMarketPrice|floatformat:2|intcomma }}</p>
+          <img class="h-9 w-9 inline-flex mr-3" src="{{ request.scheme }}://{{ request.get_host }}/{{info.logoImage}}" alt="{{ info.coinName }}">
+          <h1>{{ info.coinName }}</h1>
+          <p class="text-2xl ml-10">${{ info.lastPrice|floatformat:2|intcomma }}</p>
         </div>
+        
+        <div class="inline-flex rounded-md shadow-sm py-5" role="group">
+          <button type="button" id="thirtyDaysBtn" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white">
+            30 days
+          </button>
+          <button type="button" id="sixtyDaysBtn" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white default">
+            60 days
+          </button>
+          <button type="button" id="oneTwentyDaysBtn" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white">
+            120 days
+          </button>
+          <button type="button" id="allDataBtn" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white">
+            All data
+          </button>
+        </div>
+
         <div class="w-full px-10 py-6">
           <canvas id="myChart"></canvas>
         </div>
@@ -64,38 +80,28 @@
           </button>
         </div>
       </div>
-      
-      
     </div>
-    
-    </div>
-    
-      
-    </div>
-    
-    </div>
+
     
 
 
     {% endif %}
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-      window.onload = function() {
-        var dates_json = "{{ dates }}";
-        var prices_json = "{{ prices }}";
-        var dates = JSON.parse(dates_json.replace(/&quot;/g, '"'));
-        var prices = JSON.parse(prices_json.replace(/&quot;/g, '"'));
-        var minPrice = Math.min(...prices);
-    
-        var ctx = document.getElementById('myChart').getContext('2d');
-    
-        // Define gradient
-        var gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(255, 99, 132, 0.9)');
-        gradient.addColorStop(1, 'rgba(255, 99, 132, 0)');
-    
-        var myChart = new Chart(ctx, {
+      var myChart;
+      var ctx = document.getElementById('myChart').getContext('2d');
+      var dates_json = "{{ dates }}";
+      var prices_json = "{{ prices }}";
+      var dates = JSON.parse(dates_json.replace(/&quot;/g, '"'));
+      var prices = JSON.parse(prices_json.replace(/&quot;/g, '"'));
+      var minPrice = Math.min(...prices);
+      var gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      gradient.addColorStop(0, 'rgba(255, 99, 132, 0.9)');
+      gradient.addColorStop(1, 'rgba(255, 99, 132, 0)');
+
+      var config = {
           type: 'line',
           data: {
             labels: dates,
@@ -128,28 +134,72 @@
               }
             }
           }
-        });
-    
-        var slider = document.getElementById("default-range");
-        var output = document.getElementById("slider-value");
-    
-        output.innerHTML = slider.value;
-    
-        slider.oninput = function() {
-          output.innerHTML = this.value;
-        }
-    
-        var sliderToggle = document.getElementById("slider-toggle");
-        var sliderContainer = document.getElementById("slider-container");
-    
-        sliderToggle.addEventListener("click", function() {
-          sliderContainer.classList.toggle("hidden");
-          sliderToggle.innerText = sliderToggle.innerText === "Hide" ? "Show" : "Hide";
-        });
+        };
+
+      window.onload = function() {
+        myChart = new Chart(ctx, config);
       };
+
+      $("#thirtyDaysBtn").click(function() {
+          var daysToShow = 30;
+          var new_dates = dates.slice(-daysToShow);
+          var new_prices = prices.slice(-daysToShow);
+          var data = myChart.config.data;
+          data.labels = new_dates;
+          data.datasets[0].data = new_prices;
+          data.datasets[0].label = '30 Days Stock Prices';
+          myChart.update();
+      });
+
+      $("#sixtyDaysBtn").click(function() {
+          var daysToShow = 60;
+          var new_dates = dates.slice(-daysToShow);
+          var new_prices = prices.slice(-daysToShow);
+          var data = myChart.config.data;
+          data.labels = new_dates;
+          data.datasets[0].data = new_prices;
+          data.datasets[0].label = '60 Days Stock Prices';
+          myChart.update();
+      });
+
+      $("#oneTwentyDaysBtn").click(function() {
+          var daysToShow = 120;
+          var new_dates = dates.slice(-daysToShow);
+          var new_prices = prices.slice(-daysToShow);
+          var data = myChart.config.data;
+          data.labels = new_dates;
+          data.datasets[0].data = new_prices;
+          data.datasets[0].label = '120 Days Stock Prices';
+          myChart.update();
+      });
+
+      $("#allDataBtn").click(function() {
+          var new_dates = dates
+          var new_prices = prices
+          var data = myChart.config.data;
+          data.labels = new_dates;
+          data.datasets[0].data = new_prices;
+          data.datasets[0].label = 'All Days Stock Prices';
+          myChart.update();
+      });
+
+        // var slider = document.getElementById("default-range");
+        // var output = document.getElementById("slider-value");
+    
+        // output.innerHTML = slider.value;
+    
+        // slider.oninput = function() {
+        //   output.innerHTML = this.value;
+        // }
+    
+        // var sliderToggle = document.getElementById("slider-toggle");
+        // var sliderContainer = document.getElementById("slider-container");
+    
+        // sliderToggle.addEventListener("click", function() {
+        //   sliderContainer.classList.toggle("hidden");
+        //   sliderToggle.innerText = sliderToggle.innerText === "Hide" ? "Show" : "Hide";
+        // });
     </script>
-    
-    
     
 
 {% endblock %}

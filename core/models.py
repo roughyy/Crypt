@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+import pandas as pd
 
 
 # Create your models here.
@@ -10,6 +11,12 @@ class PersonalPrediction(models.Model):
     CSVFile = models.FileField(upload_to="CSVFiles")
     predictedData = models.TextField(null=True)
     createdDateTime = models.DateTimeField(auto_now_add=True, null=True)
+
+    def set_predictedData(self, df):
+        self.predictedData = df.to_json()
+
+    def get_predictedData(self):
+        return pd.read_json(self.predictedData)
 
 
 class UserHistory(models.Model):
@@ -50,24 +57,44 @@ class ProphetScore(models.Model):
 class Cryptocurrencies(models.Model):
     coinName = models.CharField(max_length=30)
     symbol = models.CharField(max_length=10)
-    logoImage = models.FileField(upload_to="cryptocurrenciesLogo", null=True)
+    logoImage = models.FileField(
+        upload_to="cryptocurrenciesLogo", null=True, blank=True
+    )
     categoryId = models.ForeignKey(CoinCategory, on_delete=models.CASCADE)
     lastPrice = models.CharField(max_length=30, null=True)
     historicalData = models.TextField(null=True, blank=True)
-    predictedData = models.TextField(null=True)
+    predictedData = models.TextField(null=True, blank=True)
     lstmModelId = models.ForeignKey(
         LSTMModel, on_delete=models.CASCADE, blank=True, null=True
     )
     prophetId = models.ForeignKey(
         ProphetScore, on_delete=models.CASCADE, blank=True, null=True
     )
-    updateDateTime = models.DateTimeField(auto_now_add=True)
+    updateDateTime = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.coinName
+
+    def set_historicalData(self, df):
+        self.historicalData = df.to_json()
+
+    def set_predictedData(self, df):
+        self.predictedData = df.to_json()
+
+    def get_historicalData(self):
+        return pd.read_json(self.historicalData)
+
+    def get_predictedData(self):
+        return pd.read_json(self.predictedData)
 
 
 class SystemPrediction(models.Model):
     coinId = models.ForeignKey(Cryptocurrencies, on_delete=models.CASCADE)
     predictedData = models.TextField()
     createdDateTime = models.DateTimeField(auto_now_add=True)
+
+    def set_predictedData(self, df):
+        self.predictedData = df.to_json()
+
+    def get_predictedData(self):
+        return pd.read_json(self.predictedData)

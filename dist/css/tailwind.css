@@ -917,6 +917,10 @@ video {
   place-content: center;
 }
 
+.content-end {
+  align-content: flex-end;
+}
+
 .items-start {
   align-items: flex-start;
 }
@@ -1017,6 +1021,14 @@ video {
 
 .border-r-4 {
   border-right-width: 4px;
+}
+
+.border-b {
+  border-bottom-width: 1px;
+}
+
+.border-t {
+  border-top-width: 1px;
 }
 
 .border-dashed {

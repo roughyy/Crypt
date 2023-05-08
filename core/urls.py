@@ -13,4 +13,15 @@ urlpatterns = [
     path("signup/", views.signup, name="signup"),
     path("logout/", views.logoutUser, name="logout"),
     path("profile/", views.profile, name="profile"),
+    path("debug/", views.debug, name="debug"),
+    path(
+        "populate-cryptocurrencies-data/",
+        views.populateCryptocurrenciesData,
+        name="populate-cryptocurrencies-data",
+    ),
+    path(
+        "populate-cryptocurrencies-historical-data/",
+        views.populateCryptocurrenciesHistoricalData,
+        name="populate-cryptocurrencies-historical-data",
+    ),
 ]
