@@ -9,7 +9,7 @@ import pandas as pd
 class PersonalPrediction(models.Model):
     userId = models.ForeignKey(User, on_delete=models.CASCADE)
     CSVFile = models.FileField(upload_to="CSVFiles")
-    predictedData = models.TextField(null=True)
+    predictedData = models.TextField(null=True, blank=True)
     createdDateTime = models.DateTimeField(auto_now_add=True, null=True)
 
     def set_predictedData(self, df):

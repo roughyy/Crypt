@@ -5,6 +5,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import user_passes_test
 from django.db import transaction
 from django.utils import timezone
+from django.http import HttpResponse
+
 
 import datetime
 
@@ -170,8 +172,15 @@ def detail(request):
                 ticker = yf.Ticker(symbol)
 
                 # Retrieve historical data about the stock
-                historical_data = ticker.history(period="1mo")
+                historical_data = yf.download(symbol)
+                lastPrice = yf.download(symbol, interval="1m")["Close"][-1]
                 coin_info = ticker.info
+                coin_info["lastPrice"] = lastPrice
+
+                if "longName" in coin_info:
+                    coin_info.update({"coinName": coin_info["longName"]})
+                else:
+                    coin_info.update({"coinName": coin_info["name"]})
 
                 # Extract the Close prices from the historical data
                 close_prices = historical_data["Close"].values.tolist()
@@ -213,7 +222,43 @@ def detail(request):
 
 
 def upload(request):
+    from .models import PersonalPrediction
+
+    if request.method == "POST" and request.FILES["dropzone-file"]:
+        csv_file = request.FILES["dropzone-file"]
+        if not csv_file.name.endswith(".csv"):
+            return HttpResponse("File is not a CSV")
+
+        # Create a new PersonalPrediction object and save it
+        personal_prediction = PersonalPrediction(userId=request.user, CSVFile=csv_file)
+        personal_prediction.save()
+
+        # Redirect to the page with the new PersonalPrediction object's ID as parameter
+        return redirect("core:CustomPrediction", personal_prediction.id)
+
     return render(request, "core/upload.html")
+
+
+def CustomPrediction(request, personal_prediction_id):
+    from .models import PersonalPrediction
+    import pandas as pd
+    import json
+
+    personal_prediction = PersonalPrediction.objects.get(id=personal_prediction_id)
+
+    if personal_prediction.userId == request.user.id:
+        data = personal_prediction.CSVFile
+        df = pd.read_csv(data)
+        dates = df["timestamp"]
+        prices = df["close"]
+
+        context = {
+            "dates": json.dumps(dates),
+            "prices": json.dumps(prices),
+        }
+        return render(request, "core/CustomPrediction.html", context=context)
+
+    return HttpResponse("You are not authorized to view this page.")
 
 
 def profile(request):

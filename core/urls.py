@@ -13,6 +13,11 @@ urlpatterns = [
     path("signup/", views.signup, name="signup"),
     path("logout/", views.logoutUser, name="logout"),
     path("profile/", views.profile, name="profile"),
+    path(
+        "CustomPrediction/<int:personal_prediction_id>/",
+        views.CustomPrediction,
+        name="CustomPrediction",
+    ),
     path("debug/", views.debug, name="debug"),
     path(
         "populate-cryptocurrencies-data/",
