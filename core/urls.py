@@ -13,6 +13,7 @@ urlpatterns = [
     path("signup/", views.signup, name="signup"),
     path("logout/", views.logoutUser, name="logout"),
     path("profile/", views.profile, name="profile"),
+    path("404/<message>", views.PageNotFound, name="404"),
     path(
         "CustomPrediction/<int:personal_prediction_id>/",
         views.CustomPrediction,

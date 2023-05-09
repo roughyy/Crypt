@@ -74,19 +74,6 @@ def search(request):
     from .models import Cryptocurrencies
     import yfinance as yf
 
-    symbols = (
-        "BTC-USD",
-        "ETH-USD",
-        "USDT-USD",
-        "BNB-USD",
-        "USDC-USD",
-        "XRP-USD",
-        "ADA-USD",
-        "DOGE-USD",
-        "Matic-USD",
-        "SOL-USD",
-    )
-
     try:
         queryset = Cryptocurrencies.objects.all().values()
         for currency in queryset:
@@ -158,6 +145,7 @@ def detail(request):
                     "prices": json.dumps(prices),
                     "info": coin_info,
                 }
+
             return render(request, "core/detail.html", context=context)
         else:
             try:
@@ -201,14 +189,11 @@ def detail(request):
 
                 return render(request, "core/detail.html", context=context)
 
-            except ValueError as e:
-                # Handle the error
-                messages.error(request, "Symbol not found")
+            except:
                 return render(
-                    request,
-                    "core/detail.html",
-                    {"error_message": "Symbol not found"},
+                    request, "core/PageNotFound.html", {"message": "Symbol not found"}
                 )
+
     else:
         messages.error(request, "Enter a Stock Code")
         return render(
@@ -245,6 +230,7 @@ def CustomPrediction(request, personal_prediction_id):
     from .models import PersonalPrediction
     import pandas as pd
     import json
+    from datetime import datetime
 
     if request.user.is_authenticated:
         personal_prediction = PersonalPrediction.objects.get(id=personal_prediction_id)
@@ -253,6 +239,10 @@ def CustomPrediction(request, personal_prediction_id):
             data = personal_prediction.CSVFile
             df = pd.read_csv(data, sep=";")
             dates = df["timestamp"].tolist()
+            dates = [
+                datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%Y-%m-%d")
+                for date in dates
+            ]
             prices = df["close"].tolist()
             last_price = prices[-1]
 
@@ -268,6 +258,15 @@ def CustomPrediction(request, personal_prediction_id):
 
 def profile(request):
     return render(request, "core/profile.html")
+
+
+from django.http import HttpResponseNotFound
+
+
+def PageNotFound(request, message):
+    return HttpResponseNotFound(
+        render(request, "core/PageNotFound.html", {"message": message})
+    )
 
 
 # Debug functions

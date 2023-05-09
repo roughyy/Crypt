@@ -2,6 +2,7 @@ from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
+from django.core.validators import FileExtensionValidator
 
 
 class CreateUserForm(UserCreationForm):
@@ -44,4 +45,6 @@ class CreateUserForm(UserCreationForm):
 
 
 class UploadFile(forms.Form):
-    file = forms.FileField()
+    file = forms.FileField(
+        validators=[FileExtensionValidator(allowed_extensions=["csv"])]
+    )
