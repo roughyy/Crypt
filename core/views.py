@@ -218,20 +218,27 @@ def detail(request):
 
 def upload(request):
     from .models import PersonalPrediction
+    from .forms import UploadFile
 
-    if request.method == "POST" and request.FILES["dropzone-file"]:
-        csv_file = request.FILES["dropzone-file"]
-        if not csv_file.name.endswith(".csv"):
-            return HttpResponse("File is not a CSV")
+    if request.method == "POST":
+        form = UploadFile(request.POST, request.FILES)
+        if form.is_valid():
+            csv_file = form.cleaned_data["file"]
+            if not csv_file.name.endswith(".csv"):
+                return HttpResponse("File is not a CSV")
 
-        # Create a new PersonalPrediction object and save it
-        personal_prediction = PersonalPrediction(userId=request.user, CSVFile=csv_file)
-        personal_prediction.save()
+            # Create a new PersonalPrediction object and save it
+            personal_prediction = PersonalPrediction(
+                userId=request.user, CSVFile=csv_file
+            )
+            personal_prediction.save()
 
-        # Redirect to the page with the new PersonalPrediction object's ID as parameter
-        return redirect("core:CustomPrediction", personal_prediction.id)
+            # Redirect to the page with the new PersonalPrediction object's ID as parameter
+            return redirect("core:CustomPrediction", personal_prediction.id)
+    else:
+        form = UploadFile()
 
-    return render(request, "core/upload.html")
+    return render(request, "core/upload.html", {"form": form})
 
 
 def CustomPrediction(request, personal_prediction_id):
@@ -239,19 +246,22 @@ def CustomPrediction(request, personal_prediction_id):
     import pandas as pd
     import json
 
-    personal_prediction = PersonalPrediction.objects.get(id=personal_prediction_id)
+    if request.user.is_authenticated:
+        personal_prediction = PersonalPrediction.objects.get(id=personal_prediction_id)
 
-    if personal_prediction.userId == request.user.id:
-        data = personal_prediction.CSVFile
-        df = pd.read_csv(data)
-        dates = df["timestamp"]
-        prices = df["close"]
+        if personal_prediction.userId == request.user:
+            data = personal_prediction.CSVFile
+            df = pd.read_csv(data, sep=";")
+            dates = df["timestamp"].tolist()
+            prices = df["close"].tolist()
+            last_price = prices[-1]
 
-        context = {
-            "dates": json.dumps(dates),
-            "prices": json.dumps(prices),
-        }
-        return render(request, "core/CustomPrediction.html", context=context)
+            context = {
+                "dates": json.dumps(dates),
+                "prices": json.dumps(prices),
+                "last_price": last_price,
+            }
+            return render(request, "core/CustomPrediction.html", context=context)
 
     return HttpResponse("You are not authorized to view this page.")
 

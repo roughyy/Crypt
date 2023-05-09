@@ -41,3 +41,7 @@ class CreateUserForm(UserCreationForm):
             }
         )
     )
+
+
+class UploadFile(forms.Form):
+    file = forms.FileField()
