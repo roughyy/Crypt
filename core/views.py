@@ -234,6 +234,7 @@ def CustomPrediction(request, personal_prediction_id):
 
     if request.user.is_authenticated:
         personal_prediction = PersonalPrediction.objects.get(id=personal_prediction_id)
+        previous_url = request.META.get("HTTP_REFERER", "/")
 
         if personal_prediction.userId == request.user:
             data = personal_prediction.CSVFile
@@ -253,7 +254,11 @@ def CustomPrediction(request, personal_prediction_id):
             }
             return render(request, "core/CustomPrediction.html", context=context)
 
-    return HttpResponse("You are not authorized to view this page.")
+    return render(
+        request,
+        "core/PageNotFound.html",
+        {"message": "Your'e not authorize to view this page"},
+    )
 
 
 def profile(request):
