@@ -261,6 +261,48 @@ def CustomPrediction(request, personal_prediction_id):
     )
 
 
+def result(request):
+    from .forecast import forecast_prophet, forecast_lstm
+    from .models import PersonalPrediction
+    import json
+
+    prediction_id = request.GET.get("predictionId")
+    dates = request.GET.getlist("dates", [])
+    prices = request.GET.getlist("prices", [])
+    algorithm = request.GET.get("algorithm")
+    n_days = int(request.GET.get("n_days", 0))
+
+    # Call the appropriate forecast function based on the selected algorithm
+    if algorithm == "prophet":
+        predicted_dates, predicted_prices = forecast_prophet(dates, prices, n_days)
+    elif algorithm == "lstm":
+        predicted_dates, predicted_prices = forecast_lstm(dates, prices, n_days)
+    else:
+        return render(
+            request, "core/PageNotFound.html", {"message": "Something Went Wrong"}
+        )
+
+    # Pass the data to the template
+    predicted_value = {
+        "predicted_dates": predicted_dates,
+        "predicted_prices": predicted_prices,
+    }
+    predicted_value_json = json.dumps(predicted_value)
+    personal_prediction = PersonalPrediction(
+        prediction_id=prediction_id, value=predicted_value_json
+    )
+    personal_prediction.save()
+    context = {
+        "dates": dates,
+        "prices": prices,
+        "predicted_dates": predicted_dates,
+        "predicted_prices": predicted_prices,
+        "last_price": prices[-1],  # Assuming last_price is the last element in prices
+    }
+
+    return render(request, "result.html", context)
+
+
 def profile(request):
     return render(request, "core/profile.html")
 

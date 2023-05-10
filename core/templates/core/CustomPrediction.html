@@ -31,18 +31,26 @@
   <div class="w-4/12 mt-10">
     <div class="flex flex-col items-start ml-6">
       <h1 class="text-3xl text-white mb-4 font-bold">Tuner</h1>
-      <label class="mb-2 text-white text-sm text-left">Choose algorithm</label>
-      <div class="inline-flex rounded-md shadow-sm mb-6" role="group">
-        <button type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white w-32">
-          LSTM
-        </button>
-        <button type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white w-32">
-          Prophet
-        </button>
+      <div class="relative inline-block">
+        <div>
+          <button type="button" class="inline-flex justify-center w-48 py-2 text-lg font-medium text-gray-900 bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-700" id="algorithm-dropdown">
+            Choose algorithm
+            <svg class="w-5 h-5 ml-1 -mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 12l-5-5h10l-5 5z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+        <ul class="absolute z-10 left-0 hidden mt-2 space-y-2 py-2 w-48 bg-white rounded-md shadow-lg" id="algorithm-dropdown-list">
+          <li><a href="#" class="block px-4 py-2 text-lg text-gray-700 hover:bg-gray-100 hover:text-blue-700" onclick="selectAlgorithm('LSTM')">LSTM</a></li>
+          <li><a href="#" class="block px-4 py-2 text-lg text-gray-700 hover:bg-gray-100 hover:text-blue-700" onclick="selectAlgorithm('Prophet')">Prophet</a></li>
+        </ul>
       </div>
-      <label for="default-range" class="block mb-2 text-sm font-medium  text-white text-left">Pick day range</label>
+      <label for="default-range" class="block mt-6 text-lg font-medium text-white">Pick day range</label>
       <input id="default-range" type="range" min="0" max="20" value="10" step="1" class="w-64 h-2 bg-gray-200 rounded-lg cursor-pointer appearance-none">
-      <span id="slider-value" class="text-white text-sm mt-1"></span>
+      <span id="slider-value" class="text-white text-lg mt-2"></span>
+      <a href="{% url 'result' %}?dates={{ dates|urlencode }}&prices={{ prices|urlencode }}" class="py-4 px-6 mt-6 text-white text-2xl bg-rose-500 hover:bg-rose-900 rounded-xl w-64">
+        Predict
+      </a>           
       <style>
         #default-range::-webkit-slider-thumb {
           -webkit-appearance: none;
@@ -60,14 +68,12 @@
           border: 0;
           border-radius: 50%;
           background-color: rgb(190 18 60);/* change this to rose-700 */
+  
           cursor: pointer;
         }
       </style>
-      <button class="py-4 px-6 mt-10 text-white text-2xl bg-rose-500 hover:bg-rose-900 rounded-xl w-64">
-        Predict
-      </button>
     </div>
-  </div>
+  </div>  
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -166,6 +172,64 @@
           data.datasets[0].label = 'All Days Stock Prices';
           myChart.update();
       });
+
+        var slider = document.getElementById("default-range");
+        const dropdownButton = document.getElementById('algorithm-dropdown');
+        const dropdownList = document.getElementById('algorithm-dropdown-list');
+        const algorithmText = document.getElementById('algorithm-text');
+        const rangeInput = document.getElementById('default-range');
+        const output = document.getElementById('slider-value');
+        var algo = null;
+        var n_days = null;
+        var predictButton = document.getElementById('predict-button');
+
+        predictButton.addEventListener('click', function() {
+          if (algo && n_days) {
+            var url = "{% url 'result' %}?dates=" + encodeURIComponent(dates_json) + "&prices=" + encodeURIComponent(prices_json) + "&algorithm=" + encodeURIComponent(algo) + "&n_days=" + encodeURIComponent(n_days);
+            window.location.href = url;
+          }
+        });
+        
+        dropdownButton.addEventListener('click', function () {
+          dropdownList.classList.toggle('hidden');
+        });
+
+        function selectAlgorithm(algorithm) {
+          dropdownButton.innerText = algorithm;
+          algo = algorithm;
+          dropdownList.classList.add('hidden');
+
+          if (algorithm === 'LSTM') {
+            rangeInput.setAttribute('max', '20');
+            rangeInput.setAttribute('value', '10');
+            output.innerHTML = rangeInput.value;
+          } else if (algorithm === 'Prophet') {
+            rangeInput.setAttribute('max', '120');
+            rangeInput.setAttribute('value', '60');
+            output.innerHTML = rangeInput.value;
+          }
+        }
+
+        rangeInput.oninput = function() {
+          output.innerHTML = this.value;
+        };
+    
+        output.innerHTML = slider.value;
+    
+        slider.oninput = function() {
+          output.innerHTML = this.value;
+          n_days = this.value;
+          output.innerHTML = n_days;
+        }
+    
+        var sliderToggle = document.getElementById("slider-toggle");
+        var sliderContainer = document.getElementById("slider-container");
+    
+        sliderToggle.addEventListener("click", function() {
+          sliderContainer.classList.toggle("hidden");
+          sliderToggle.innerText = sliderToggle.innerText === "Hide" ? "Show" : "Hide";
+        });
+             
 </script>
 
 
