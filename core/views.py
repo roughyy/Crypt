@@ -263,44 +263,56 @@ def CustomPrediction(request, personal_prediction_id):
 
 def result(request):
     from .forecast import forecast_prophet, forecast_lstm
-    from .models import PersonalPrediction
+    from datetime import datetime
     import json
 
     prediction_id = request.GET.get("predictionId")
-    dates = request.GET.getlist("dates", [])
-    prices = request.GET.getlist("prices", [])
+    dates = (
+        request.GET.get("dates", "")
+        .replace("[", "")
+        .replace("]", "")
+        .replace("&quot;", "")
+        .split(",")
+    )
+    prices = (
+        request.GET.get("prices", "")
+        .replace("[", "")
+        .replace("]", "")
+        .replace("&quot;", "")
+        .split(",")
+    )
     algorithm = request.GET.get("algorithm")
     n_days = int(request.GET.get("n_days", 0))
 
+    # Convert datetime strings to a standard format
+    dates = [datetime.strptime(date.strip(), "%Y-%m-%d") for date in dates]
+
     # Call the appropriate forecast function based on the selected algorithm
-    if algorithm == "prophet":
-        predicted_dates, predicted_prices = forecast_prophet(dates, prices, n_days)
-    elif algorithm == "lstm":
+    if algorithm == "Prophet":
+        predicted_dates, predicted_prices = forecast_prophet(
+            dates, prices, n_days, Prediction_id=prediction_id
+        )
+    elif algorithm == "Lstm":
         predicted_dates, predicted_prices = forecast_lstm(dates, prices, n_days)
     else:
         return render(
             request, "core/PageNotFound.html", {"message": "Something Went Wrong"}
         )
 
-    # Pass the data to the template
-    predicted_value = {
-        "predicted_dates": predicted_dates,
-        "predicted_prices": predicted_prices,
-    }
-    predicted_value_json = json.dumps(predicted_value)
-    personal_prediction = PersonalPrediction(
-        prediction_id=prediction_id, value=predicted_value_json
-    )
-    personal_prediction.save()
+    # Assuming predicted_dates is a list of strings
+    dates = [date.strftime("%Y-%m-%d") for date in dates]
+    predicted_dates = [date.strftime("%Y-%m-%d") for date in predicted_dates]
+    predicted_prices = ["{:.7f}".format(price) for price in predicted_prices]
+
     context = {
-        "dates": dates,
-        "prices": prices,
-        "predicted_dates": predicted_dates,
-        "predicted_prices": predicted_prices,
+        "dates": json.dumps(dates),
+        "prices": json.dumps(prices),
+        "predicted_dates": json.dumps(predicted_dates),
+        "predicted_prices": json.dumps(predicted_prices),
         "last_price": prices[-1],  # Assuming last_price is the last element in prices
     }
 
-    return render(request, "result.html", context)
+    return render(request, "core/result.html", context)
 
 
 def profile(request):
