@@ -126,6 +126,7 @@ def detail(request):
                     "dates": json.dumps(dates),
                     "prices": json.dumps(prices),
                     "info": coin_info,
+                    "coinId": coin_info.id,
                 }
             else:
                 data = yf.download(symbol)
@@ -146,6 +147,7 @@ def detail(request):
                     "dates": json.dumps(dates),
                     "prices": json.dumps(prices),
                     "info": coin_info,
+                    "coinId": coin_info.id,
                 }
 
             return render(request, "core/detail.html", context=context)
@@ -187,6 +189,7 @@ def detail(request):
                     "dates": json.dumps(dates),
                     "prices": json.dumps(prices),
                     "info": coin_info,
+                    "coinId": None,
                 }
 
                 return render(request, "core/detail.html", context=context)
@@ -268,51 +271,64 @@ def result(request):
     from datetime import datetime
     import json
 
-    prediction_id = request.GET.get("predictionId")
-    dates = (
-        request.GET.get("dates", "")
-        .replace("[", "")
-        .replace("]", "")
-        .replace("&quot;", "")
-        .split(",")
-    )
-    prices = (
-        request.GET.get("prices", "")
-        .replace("[", "")
-        .replace("]", "")
-        .replace("&quot;", "")
-        .split(",")
-    )
-    algorithm = request.GET.get("algorithm")
-    n_days = int(request.GET.get("n_days", 0))
-
-    # Convert datetime strings to a standard format
-    dates = [datetime.strptime(date.strip(), "%Y-%m-%d") for date in dates]
-
-    # Call the appropriate forecast function based on the selected algorithm
-    if algorithm == "Prophet":
-        predicted_dates, predicted_prices = forecast_prophet(
-            dates, prices, n_days, Prediction_id=prediction_id
+    if request.method == "POST":
+        prediction_id = request.POST.get("predictionId")
+        coin_id = request.POST.get("coinId")
+        dates = (
+            request.POST.get("dates", "")
+            .replace("[", "")
+            .replace("]", "")
+            .replace("&quot;", "")
+            .split(",")
         )
-    elif algorithm == "Lstm":
-        predicted_dates, predicted_prices = forecast_lstm(dates, prices, n_days)
-    else:
-        return render(
-            request, "core/PageNotFound.html", {"message": "Something Went Wrong"}
+        prices = (
+            request.POST.get("prices", "")
+            .replace("[", "")
+            .replace("]", "")
+            .replace("&quot;", "")
+            .split(",")
         )
+        algorithm = request.POST.get("algorithm")
+        n_days = int(request.POST.get("n_days", 0))
 
-    # Assuming predicted_dates is a list of strings
-    dates = [date.strftime("%Y-%m-%d") for date in dates]
+        # Convert datetime strings to a standard format
+        dates = [
+            datetime.strptime(date.strip().strip('"'), "%Y-%m-%d") for date in dates
+        ]
 
-    context = {
-        "dates": json.dumps(dates),
-        "prices": json.dumps(prices),
-        "predicted_dates": json.dumps(predicted_dates),
-        "predicted_prices": json.dumps(predicted_prices),
-        "last_price": prices[-1],  # Assuming last_price is the last element in prices
-    }
+        # Call the appropriate forecast function based on the selected algorithm
+        if algorithm == "Prophet":
+            predicted_dates, predicted_prices = forecast_prophet(
+                dates, prices, n_days, Prediction_id=prediction_id
+            )
+        elif algorithm == "Lstm":
+            predicted_dates, predicted_prices = forecast_lstm(
+                dates, prices, n_days, coinId=coin_id
+            )
+        else:
+            return render(
+                request, "core/PageNotFound.html", {"message": "Something Went Wrong"}
+            )
 
-    return render(request, "core/result.html", context)
+        # Assuming predicted_dates is a list of strings
+        dates = [date.strftime("%Y-%m-%d") for date in dates]
+
+        context = {
+            "dates": json.dumps(dates),
+            "prices": json.dumps(prices),
+            "predicted_dates": json.dumps(predicted_dates),
+            "predicted_prices": json.dumps(predicted_prices),
+            "last_price": prices[
+                -1
+            ],  # Assuming last_price is the last element in prices
+        }
+
+        return render(request, "core/result.html", context)
+
+    # Handle GET requests
+    return render(
+        request, "core/PageNotFound.html", {"message": "Invalid Request Method"}
+    )
 
 
 def profile(request):

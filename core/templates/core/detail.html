@@ -3,16 +3,11 @@
 {% block title %} {{ info.symbol }} {% endblock %} 
 
 {% block content %}
-    {% if prices == "[]" or prices == "something went wrong" %}
-        <div>
-            <h2 class="text-white text-5xl font-bold mt-16">
-                Something Went Wrong
-            </h2>
-            <p class="text-purple-600 text-xl font-semibold mt-4">
-                Please try again later, there's a problem with the API
-            </p>
-        </div>
-    {% else %}
+{% if prices == "[]" or prices == "something went wrong" %}
+    <script>
+        window.location.href = "{% url 'core:page_not_found' 'Prices not available' %}";
+    </script>
+{% endif %}
     <div class="flex w-full h-screen">
       <div class="w-8/12 px-12">
         <div class="text-3xl text-white flex items-center font-semibold">
@@ -67,7 +62,6 @@
         </div>
       </div>  
     </div>
-    {% endif %}
     <style>
       #default-range::-webkit-slider-thumb {
         -webkit-appearance: none;
@@ -93,11 +87,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
-    <script>
+  <script>
           var myChart;
           var ctx = document.getElementById('myChart').getContext('2d');
           var dates_json = "{{ dates }}";
           var prices_json = "{{ prices }}";
+          var coindId = "{{ coinid }}"
           var dates = JSON.parse(dates_json.replace(/&quot;/g, '"'));
           var prices = JSON.parse(prices_json.replace(/&quot;/g, '"'));
           var minPrice = Math.min(...prices);
@@ -217,27 +212,92 @@
               }
             }
     
-            predictButton.addEventListener('click', function() {
-              event.preventDefault(); // Prevent the default click behavior
+            predictButton.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default form submission behavior
+
+            // Get the selected algorithm value from the dropdown
+            var selectedAlgorithm = algo;
+
+            // Get the value from the slider
+            var selectedNDays = n_days;
+            var predictionId = null;
+
+
+            // Get the CSRF token from the cookie
+            var csrfToken = getCookie('csrftoken');
+
+            // Create a hidden form element
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{% url 'core:result' %}";
+
+            // Create hidden input fields for the data
+            var datesInput = document.createElement('input');
+            datesInput.type = 'hidden';
+            datesInput.name = 'dates';
+            datesInput.value = JSON.stringify(dates);
+            form.appendChild(datesInput);
+
+            var pricesInput = document.createElement('input');
+            pricesInput.type = 'hidden';
+            pricesInput.name = 'prices';
+            pricesInput.value = JSON.stringify(prices);
+            form.appendChild(pricesInput);
+
+            var algorithmInput = document.createElement('input');
+            algorithmInput.type = 'hidden';
+            algorithmInput.name = 'algorithm';
+            algorithmInput.value = selectedAlgorithm;
+            form.appendChild(algorithmInput);
+
+            var nDaysInput = document.createElement('input');
+            nDaysInput.type = 'hidden';
+            nDaysInput.name = 'n_days';
+            nDaysInput.value = selectedNDays;
+            form.appendChild(nDaysInput);
+
+            var coinIdInput = document.createElement('input');
+            coinIdInput.type = 'hidden';
+            coinIdInput.name = 'coinId';
+            coinIdInput.value = coinId;
+            form.appendChild(coinIdInput);
+
+            var predictionIdInput = document.createElement('input');
+            predictionIdInput.type = 'hidden';
+            predictionIdInput.name = 'predictionId';
+            predictionIdInput.value = predictionId;
+            form.appendChild(predictionIdInput);
+
+            // Add the CSRF token to the form
+            var csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+
+            // Append the form to the document body and submit it
+            document.body.appendChild(form);
+            form.submit();
+          });
+
     
-              // Get the selected algorithm value from the dropdown
-              var selectedAlgorithm = algo;
+          // Function to retrieve the CSRF token from the cookie
+          function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+              var cookies = document.cookie.split(';');
+              for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+                }
+              }
+            }
+            return cookieValue;
+          }
     
-              // Get the value from the slider
-              var selectedNDays = n_days;
     
-              var datesString = dates.join(",");
-              var pricesString = prices.join(",");
-    
-              // Construct the new href value
-              var newHref = "{% url 'core:result' %}?dates=" + encodeURIComponent(dates_json) + "&prices=" + encodeURIComponent(prices_json) + "&algorithm=" + encodeURIComponent(selectedAlgorithm) + "&n_days=" + encodeURIComponent(selectedNDays);
-    
-              // Update the href attribute
-              predictButton.href = newHref;
-    
-              // Navigate to the new URL
-              window.location.href = newHref;
-            });
     
             rangeInput.oninput = function() {
               output.innerHTML = this.value;
@@ -259,7 +319,7 @@
               sliderToggle.innerText = sliderToggle.innerText === "Hide" ? "Show" : "Hide";
             });
                  
-    </script>
+  </script>
     
 
 {% endblock %}

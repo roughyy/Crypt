@@ -205,27 +205,91 @@
           }
         }
 
-        predictButton.addEventListener('click', function() {
-          event.preventDefault(); // Prevent the default click behavior
+        predictButton.addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent the default form submission behavior
 
-          // Get the selected algorithm value from the dropdown
-          var selectedAlgorithm = algo;
+        // Get the selected algorithm value from the dropdown
+        var selectedAlgorithm = algo;
 
-          // Get the value from the slider
-          var selectedNDays = n_days;
+        // Get the value from the slider
+        var selectedNDays = n_days;
 
-          var datesString = dates.join(",");
-          var pricesString = prices.join(",");
+        var coinId = null;
 
-          // Construct the new href value
-          var newHref = "{% url 'core:result' %}?dates=" + encodeURIComponent(dates_json) + "&prices=" + encodeURIComponent(prices_json) + "&algorithm=" + encodeURIComponent(selectedAlgorithm) + "&n_days=" + encodeURIComponent(selectedNDays) + "&predictionId="+encodeURIComponent(predictionId);
+        // Get the CSRF token from the cookie
+        var csrfToken = getCookie('csrftoken');
 
-          // Update the href attribute
-          predictButton.href = newHref;
+        // Create a form element
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{% url 'core:result' %}";
 
-          // Navigate to the new URL
-          window.location.href = newHref;
-        });
+        // Create hidden input fields for the data
+        var datesInput = document.createElement('input');
+        datesInput.type = 'hidden';
+        datesInput.name = 'dates';
+        datesInput.value = JSON.stringify(dates);
+        form.appendChild(datesInput);
+
+        var pricesInput = document.createElement('input');
+        pricesInput.type = 'hidden';
+        pricesInput.name = 'prices';
+        pricesInput.value = JSON.stringify(prices);
+        form.appendChild(pricesInput);
+
+        var algorithmInput = document.createElement('input');
+        algorithmInput.type = 'hidden';
+        algorithmInput.name = 'algorithm';
+        algorithmInput.value = selectedAlgorithm;
+        form.appendChild(algorithmInput);
+
+        var nDaysInput = document.createElement('input');
+        nDaysInput.type = 'hidden';
+        nDaysInput.name = 'n_days';
+        nDaysInput.value = selectedNDays;
+        form.appendChild(nDaysInput);
+
+        var coinIdInput = document.createElement('input');
+        coinIdInput.type = 'hidden';
+        coinIdInput.name = 'coinId';
+        coinIdInput.value = coinId;
+        form.appendChild(coinIdInput);
+
+        var predictionIdInput = document.createElement('input');
+        predictionIdInput.type = 'hidden';
+        predictionIdInput.name = 'predictionId';
+        predictionIdInput.value = predictionId;
+        form.appendChild(predictionIdInput);
+
+        // Add the CSRF token to the form
+        var csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+
+        // Append the form to the document body and submit it
+        document.body.appendChild(form);
+        form.submit();
+      });
+
+      // Function to retrieve the CSRF token from the cookie
+      function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          var cookies = document.cookie.split(';');
+          for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+
 
         rangeInput.oninput = function() {
           output.innerHTML = this.value;
