@@ -41,40 +41,41 @@
           </button>
         </div>
         <ul class="absolute z-10 left-0 hidden mt-2 space-y-2 py-2 w-48 bg-white rounded-md shadow-lg" id="algorithm-dropdown-list">
-          <li><a href="#" class="block px-4 py-2 text-lg text-gray-700 hover:bg-gray-100 hover:text-blue-700" onclick="selectAlgorithm('LSTM')">LSTM</a></li>
+          <li><a href="#" class="block px-4 py-2 text-lg text-gray-700 hover:bg-gray-100 hover:text-blue-700" onclick="selectAlgorithm('Lstm')">LSTM</a></li>
           <li><a href="#" class="block px-4 py-2 text-lg text-gray-700 hover:bg-gray-100 hover:text-blue-700" onclick="selectAlgorithm('Prophet')">Prophet</a></li>
         </ul>
       </div>
       <label for="default-range" class="block mt-6 text-lg font-medium text-white">Pick day range</label>
       <input id="default-range" type="range" min="0" max="20" value="10" step="1" class="w-64 h-2 bg-gray-200 rounded-lg cursor-pointer appearance-none">
       <span id="slider-value" class="text-white text-lg mt-2"></span>
-      <a href="{% url 'result' %}?dates={{ dates|urlencode }}&prices={{ prices|urlencode }}" class="py-4 px-6 mt-6 text-white text-2xl bg-rose-500 hover:bg-rose-900 rounded-xl w-64">
+      <a href="" class="py-4 px-6 mt-6 text-white text-2xl bg-rose-500 hover:bg-rose-900 rounded-xl w-64" id="predict-button">
         Predict
-      </a>           
-      <style>
-        #default-range::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          background-color: rgb(190 18 60);/* change this to rose-700 */
-          cursor: pointer;
-        }
-  
-        #default-range::-moz-range-thumb {
-          width: 16px;
-          height: 16px;
-          border: 0;
-          border-radius: 50%;
-          background-color: rgb(190 18 60);/* change this to rose-700 */
-  
-          cursor: pointer;
-        }
-      </style>
+      </a>
     </div>
   </div>  
 </div>
+
+<style>
+  #default-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: rgb(190 18 60);/* change this to rose-700 */
+    cursor: pointer;
+  }
+
+  #default-range::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border: 0;
+    border-radius: 50%;
+    background-color: rgb(190 18 60);/* change this to rose-700 */
+
+    cursor: pointer;
+  }
+</style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -182,13 +183,6 @@
         var algo = null;
         var n_days = null;
         var predictButton = document.getElementById('predict-button');
-
-        predictButton.addEventListener('click', function() {
-          if (algo && n_days) {
-            var url = "{% url 'result' %}?dates=" + encodeURIComponent(dates_json) + "&prices=" + encodeURIComponent(prices_json) + "&algorithm=" + encodeURIComponent(algo) + "&n_days=" + encodeURIComponent(n_days);
-            window.location.href = url;
-          }
-        });
         
         dropdownButton.addEventListener('click', function () {
           dropdownList.classList.toggle('hidden');
@@ -199,16 +193,38 @@
           algo = algorithm;
           dropdownList.classList.add('hidden');
 
-          if (algorithm === 'LSTM') {
+          if (algo === 'Lstm') {
             rangeInput.setAttribute('max', '20');
             rangeInput.setAttribute('value', '10');
             output.innerHTML = rangeInput.value;
-          } else if (algorithm === 'Prophet') {
+          } else if (algo === 'Prophet') {
             rangeInput.setAttribute('max', '120');
             rangeInput.setAttribute('value', '60');
             output.innerHTML = rangeInput.value;
           }
         }
+
+        predictButton.addEventListener('click', function() {
+          event.preventDefault(); // Prevent the default click behavior
+
+          // Get the selected algorithm value from the dropdown
+          var selectedAlgorithm = algo;
+
+          // Get the value from the slider
+          var selectedNDays = n_days;
+
+          var datesString = dates.join(",");
+          var pricesString = prices.join(",");
+
+          // Construct the new href value
+          var newHref = "{% url 'core:result' %}?dates=" + encodeURIComponent(dates_json) + "&prices=" + encodeURIComponent(prices_json) + "&algorithm=" + encodeURIComponent(selectedAlgorithm) + "&n_days=" + encodeURIComponent(selectedNDays);
+
+          // Update the href attribute
+          predictButton.href = newHref;
+
+          // Navigate to the new URL
+          window.location.href = newHref;
+        });
 
         rangeInput.oninput = function() {
           output.innerHTML = this.value;

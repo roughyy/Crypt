@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
-
-{% block title %} 404 Not Found {% endblock %} 
+{% load humanize %}
+{% block title %} Result {% endblock %} 
 
 {% block content %}
 
@@ -8,10 +8,10 @@
     <div class="w-8/12 px-12">
       <div class="text-3xl text-white flex items-center font-semibold"> 
         <h1>Your Data</h1>
-        <p class="text-2xl ml-10">${{ last_price|floatformat:2|intcomma }}</p>
+        <p class="text-2xl ml-10">${{ last_price|floatformat:4|intcomma }}</p>
       </div>
       
-      <div class="inline-flex rounded-md shadow-sm py-5 w-full" role="group">
+      <!-- <div class="inline-flex rounded-md shadow-sm py-5 w-full" role="group">
         <button type="button" id="thirtyDaysBtn" class="px-4 py-2 text-xs font-light text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white">
           30 days
         </button>
@@ -24,27 +24,13 @@
         <button type="button" id="allDataBtn" class="px-4 py-2 text-xs font-light text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white">
           All data
         </button>
-      </div>
+      </div> -->
       <div class="w-full px-10 py-6">
         <canvas id="myChart"></canvas>
       </div>
     </div>
     <div class="w-4/12 mt-10">
         <div class="flex flex-col items-start ml-6">
-            <h1 class="text-3xl text-white mb-4 font-bold">Result</h1>
-            <p class="text-white mb-2">Previous Price: ${{ last_price }}</p>
-            <p class="text-white mb-2">Predicted Dates:</p>
-            <ul class="list-disc list-inside text-white">
-                {% for date in predicted_dates %}
-                <li>{{ date }}</li>
-                {% endfor %}
-            </ul>
-            <p class="text-white mt-4 mb-2">Predicted Prices:</p>
-            <ul class="list-disc list-inside text-white">
-                {% for price in predicted_prices %}
-                <li>${{ price }}</li>
-                {% endfor %}
-            </ul>
             <a href="{{ request.META.HTTP_REFERER }}" class="mt-6 text-white underline">Go Back</a>
         </div>
     </div>  
@@ -59,38 +45,45 @@
     var dates_json = "{{ dates }}";
     var prices_json = "{{ prices }}";
     var predicted_dates_json = "{{ predicted_dates }}"
-    var predicted_price_json = "{{ predicted_price }}"
+    var predicted_price_json = "{{ predicted_prices }}"
     var dates = JSON.parse(dates_json.replace(/&quot;/g, '"'));
     var prices = JSON.parse(prices_json.replace(/&quot;/g, '"'));
+    var predicted_dates = JSON.parse(predicted_dates_json.replace(/&quot;/g, '"'));
     var predicted_prices = JSON.parse(predicted_price_json.replace(/&quot;/g, '"'));
     var minPrice = Math.min(...prices, ...predicted_prices);
     var gradient = ctx.createLinearGradient(0, 0, 0, 400);
     gradient.addColorStop(0, 'rgba(255, 99, 132, 0.9)');
     gradient.addColorStop(1, 'rgba(255, 99, 132, 0)');
-  
+    dates = dates.slice(-60);
+    prices = prices.slice(-60);
+    var combinedDates = [...dates, ...predicted_dates];
+    var nullArray = new Array(59).fill(null);
+    predicted_prices = nullArray.concat(predicted_prices)
+
+
     var lastActualPrice = prices[prices.length - 1];
     var predictedBorderColor = predicted_prices[predicted_prices.length - 1] > lastActualPrice ? 'rgba(0, 255, 0, 1)' : 'rgba(255, 255, 0, 1)';
-  
+
     var config = {
       type: 'line',
       data: {
-        labels: dates,
+        labels: combinedDates,
         datasets: [{
-          label: 'Actual Prices',
-          data: prices,
-          borderColor: 'rgba(255, 99, 132, 1)',
+          label: 'Previous Prices',
+          data: prices, // Use only the past 60 prices
+          borderColor: 'rgba(255, 99, 132, 1)', // Color for previous prices line
           borderWidth: 1,
           fill: true,
-          backgroundColor: gradient,
-          fillOpacity: 0.2,
           tension: 0.4,
+          backgroundColor: 'rgba(255, 99, 132, 0.2)', // Background color for previous prices area
         }, {
           label: 'Predicted Prices',
-          data: predicted_prices,
-          borderColor: predictedBorderColor,
+          data: predicted_prices, // Use the predicted prices
+          borderColor: 'rgba(54, 162, 235, 1)', // Color for predicted prices line
           borderWidth: 1,
-          fill: false,
+          fill: true,
           tension: 0.4,
+          backgroundColor: 'rgba(54, 162, 235, 0.2)', // Background color for predicted prices area
         }]
       },
       options: {
@@ -112,52 +105,51 @@
         }
       }
     };
-  
     window.onload = function() {
       myChart = new Chart(ctx, config);
     };
-        $("#thirtyDaysBtn").click(function() {
-            var daysToShow = 30;
-            var new_dates = dates.slice(-daysToShow);
-            var new_prices = prices.slice(-daysToShow);
-            var data = myChart.config.data;
-            data.labels = new_dates;
-            data.datasets[0].data = new_prices;
-            data.datasets[0].label = '30 Days Stock Prices';
-            myChart.update();
-        });
+        // $("#thirtyDaysBtn").click(function() {
+        //     var daysToShow = 30;
+        //     var new_dates = combinedDates.slice(-daysToShow);
+        //     var new_prices = combinedPrices.slice(-daysToShow);
+        //     var data = myChart.config.data;
+        //     data.labels = new_dates;
+        //     data.datasets[0].data = new_prices;
+        //     data.datasets[0].label = '30 Days Stock Prices';
+        //     myChart.update();
+        // });
   
-        $("#sixtyDaysBtn").click(function() {
-            var daysToShow = 60;
-            var new_dates = dates.slice(-daysToShow);
-            var new_prices = prices.slice(-daysToShow);
-            var data = myChart.config.data;
-            data.labels = new_dates;
-            data.datasets[0].data = new_prices;
-            data.datasets[0].label = '60 Days Stock Prices';
-            myChart.update();
-        });
+        // $("#sixtyDaysBtn").click(function() {
+        //     var daysToShow = 60;
+        //     var new_dates = combinedDates.slice(-daysToShow);
+        //     var new_prices = combinedPrices.slice(-daysToShow);
+        //     var data = myChart.config.data;
+        //     data.labels = new_dates;
+        //     data.datasets[0].data = new_prices;
+        //     data.datasets[0].label = '60 Days Stock Prices';
+        //     myChart.update();
+        // });
   
-        $("#oneTwentyDaysBtn").click(function() {
-            var daysToShow = 120;
-            var new_dates = dates.slice(-daysToShow);
-            var new_prices = prices.slice(-daysToShow);
-            var data = myChart.config.data;
-            data.labels = new_dates;
-            data.datasets[0].data = new_prices;
-            data.datasets[0].label = '120 Days Stock Prices';
-            myChart.update();
-        });
+        // $("#oneTwentyDaysBtn").click(function() {
+        //     var daysToShow = 120;
+        //     var new_dates = combinedDates.slice(-daysToShow);
+        //     var new_prices = combinedPrices.slice(-daysToShow);
+        //     var data = myChart.config.data;
+        //     data.labels = new_dates;
+        //     data.datasets[0].data = new_prices;
+        //     data.datasets[0].label = '120 Days Stock Prices';
+        //     myChart.update();
+        // });
   
-        $("#allDataBtn").click(function() {
-            var new_dates = dates
-            var new_prices = prices
-            var data = myChart.config.data;
-            data.labels = new_dates;
-            data.datasets[0].data = new_prices;
-            data.datasets[0].label = 'All Days Stock Prices';
-            myChart.update();
-        }); 
+        // $("#allDataBtn").click(function() {
+        //     var new_dates = combinedDates
+        //     var new_prices = combinedPrices
+        //     var data = myChart.config.data;
+        //     data.labels = new_dates;
+        //     data.datasets[0].data = new_prices;
+        //     data.datasets[0].label = 'All Days Stock Prices';
+        //     myChart.update();
+        // }); 
   </script>
   
 
