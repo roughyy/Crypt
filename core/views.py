@@ -8,8 +8,6 @@ from django.utils import timezone
 from django.http import HttpResponse
 
 
-import datetime
-
 # Create your views here.
 
 
@@ -105,6 +103,7 @@ def detail(request):
     from django.contrib import messages
     from .models import Cryptocurrencies, CoinCategory
     from datetime import datetime
+    import pandas as pd
 
     if request.method == "POST":
         symbol = request.POST["symbol"]
@@ -116,6 +115,9 @@ def detail(request):
 
             if lastUpdated == currentDate:
                 historical_data = coin.get_historicalData()
+                historical_data.index = pd.to_datetime(
+                    historical_data.index
+                )  # Convert index to DatetimeIndex
                 dates = list(historical_data.index.strftime("%Y-%m-%d"))
                 prices = list(historical_data["Close"])
                 coin_info = coin
@@ -234,7 +236,6 @@ def CustomPrediction(request, personal_prediction_id):
 
     if request.user.is_authenticated:
         personal_prediction = PersonalPrediction.objects.get(id=personal_prediction_id)
-        previous_url = request.META.get("HTTP_REFERER", "/")
 
         if personal_prediction.userId == request.user:
             data = personal_prediction.CSVFile
@@ -251,6 +252,7 @@ def CustomPrediction(request, personal_prediction_id):
                 "dates": json.dumps(dates),
                 "prices": json.dumps(prices),
                 "last_price": last_price,
+                "predictionId": personal_prediction_id,
             }
             return render(request, "core/CustomPrediction.html", context=context)
 
@@ -301,8 +303,6 @@ def result(request):
 
     # Assuming predicted_dates is a list of strings
     dates = [date.strftime("%Y-%m-%d") for date in dates]
-    predicted_dates = [date.strftime("%Y-%m-%d") for date in predicted_dates]
-    predicted_prices = ["{:.7f}".format(price) for price in predicted_prices]
 
     context = {
         "dates": json.dumps(dates),
@@ -384,6 +384,7 @@ def populateCryptocurrenciesData(request):
 def populateCryptocurrenciesHistoricalData(request):
     import yfinance as yf
     from .models import Cryptocurrencies
+    from datetime import datetime
 
     symbols = (
         "BTC-USD",
@@ -406,7 +407,7 @@ def populateCryptocurrenciesHistoricalData(request):
             )
             data_json = data.to_json(orient="records")
             Cryptocurrencies.objects.filter(symbol=symbol).update(
-                historicalData=data_json, updateDateTime=datetime.datetime.now()
+                historicalData=data_json, updateDateTime=datetime.now()
             )
             messages.info(request, "Crypto historical data has been populated")
 

@@ -44,163 +44,221 @@
       <div class="w-4/12 mt-10">
         <div class="flex flex-col items-start ml-6">
           <h1 class="text-3xl text-white mb-4 font-bold">Tuner</h1>
-          <label class="mb-2 text-white text-sm text-left">Choose algorithm</label>
-          <div class="inline-flex rounded-md shadow-sm mb-6" role="group">
-            <button type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white w-32">
-              LSTM
-            </button>
-            <button type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white w-32">
-              Prophet
-            </button>
+          <div class="relative inline-block">
+            <div>
+              <button type="button" class="inline-flex justify-center w-48 py-2 text-lg font-medium text-gray-900 bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-700" id="algorithm-dropdown">
+                Choose algorithm
+                <svg class="w-5 h-5 ml-1 -mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 12l-5-5h10l-5 5z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <ul class="absolute z-10 left-0 hidden mt-2 space-y-2 py-2 w-48 bg-white rounded-md shadow-lg" id="algorithm-dropdown-list">
+              <li><a href="#" class="block px-4 py-2 text-lg text-gray-700 hover:bg-gray-100 hover:text-blue-700" onclick="selectAlgorithm('Lstm')">LSTM</a></li>
+              <li><a href="#" class="block px-4 py-2 text-lg text-gray-700 hover:bg-gray-100 hover:text-blue-700" onclick="selectAlgorithm('Prophet')">Prophet</a></li>
+            </ul>
           </div>
-          <label for="default-range" class="block mb-2 text-sm font-medium  text-white text-left">Pick day range</label>
+          <label for="default-range" class="block mt-6 text-lg font-medium text-white">Pick day range</label>
           <input id="default-range" type="range" min="0" max="20" value="10" step="1" class="w-64 h-2 bg-gray-200 rounded-lg cursor-pointer appearance-none">
-          <span id="slider-value" class="text-white text-sm mt-1"></span>
-          <style>
-            #default-range::-webkit-slider-thumb {
-              -webkit-appearance: none;
-              appearance: none;
-              width: 16px;
-              height: 16px;
-              border-radius: 50%;
-              background-color: rgb(190 18 60);/* change this to rose-700 */
-              cursor: pointer;
-            }
-      
-            #default-range::-moz-range-thumb {
-              width: 16px;
-              height: 16px;
-              border: 0;
-              border-radius: 50%;
-              background-color: rgb(190 18 60);/* change this to rose-700 */
-              cursor: pointer;
-            }
-          </style>
-          <button class="py-4 px-6 mt-10 text-white text-2xl bg-rose-500 hover:bg-rose-900 rounded-xl w-64">
+          <span id="slider-value" class="text-white text-lg mt-2"></span>
+          <a href="" class="py-4 px-6 mt-6 text-white text-2xl bg-rose-500 hover:bg-rose-900 rounded-xl w-64" id="predict-button">
             Predict
-          </button>
+          </a>
         </div>
-      </div>
+      </div>  
     </div>
-
-    
-
-
     {% endif %}
-
+    <style>
+      #default-range::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background-color: rgb(190 18 60);/* change this to rose-700 */
+        cursor: pointer;
+      }
+    
+      #default-range::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border: 0;
+        border-radius: 50%;
+        background-color: rgb(190 18 60);/* change this to rose-700 */
+    
+        cursor: pointer;
+      }
+    </style>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+    
     <script>
-      var myChart;
-      var ctx = document.getElementById('myChart').getContext('2d');
-      var dates_json = "{{ dates }}";
-      var prices_json = "{{ prices }}";
-      var dates = JSON.parse(dates_json.replace(/&quot;/g, '"'));
-      var prices = JSON.parse(prices_json.replace(/&quot;/g, '"'));
-      var minPrice = Math.min(...prices);
-      var gradient = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient.addColorStop(0, 'rgba(255, 99, 132, 0.9)');
-      gradient.addColorStop(1, 'rgba(255, 99, 132, 0)');
-
-      var config = {
-          type: 'line',
-          data: {
-            labels: dates,
-            datasets: [{
-              label: 'Stock Prices',
-              data: prices,
-              borderColor: 'rgba(255, 99, 132, 1)',
-              borderWidth: 1,
-              fill: true,
-              backgroundColor: gradient, // set background color to gradient
-              fillOpacity: 0.2,
-              tension: 0.4,
-            }]
-          },
-          options: {
-            scales: {
-              x: {
-                ticks: {
-                  color: 'white'
-                }
+          var myChart;
+          var ctx = document.getElementById('myChart').getContext('2d');
+          var dates_json = "{{ dates }}";
+          var prices_json = "{{ prices }}";
+          var dates = JSON.parse(dates_json.replace(/&quot;/g, '"'));
+          var prices = JSON.parse(prices_json.replace(/&quot;/g, '"'));
+          var minPrice = Math.min(...prices);
+          var gradient = ctx.createLinearGradient(0, 0, 0, 400);
+          gradient.addColorStop(0, 'rgba(255, 99, 132, 0.9)');
+          gradient.addColorStop(1, 'rgba(255, 99, 132, 0)');
+    
+          var config = {
+              type: 'line',
+              data: {
+                labels: dates,
+                datasets: [{
+                  label: 'Stock Prices',
+                  data: prices,
+                  borderColor: 'rgba(255, 99, 132, 1)',
+                  borderWidth: 1,
+                  fill: true,
+                  backgroundColor: gradient, // set background color to gradient
+                  fillOpacity: 0.2,
+                  tension: 0.4,
+                }]
               },
-              y: {
-                min: Math.floor(minPrice * 0.95 / 10) * 10,
-                ticks: {
-                  callback: function(value, index, values) {
-                    return '$' + value.toFixed(2);
+              options: {
+                scales: {
+                  x: {
+                    ticks: {
+                      color: 'white'
+                    }
                   },
-                  color: 'white'
+                  y: {
+                    min: Math.floor(minPrice * 0.95 / 10) * 10,
+                    ticks: {
+                      callback: function(value, index, values) {
+                        return '$' + value.toFixed(2);
+                      },
+                      color: 'white'
+                    }
+                  }
                 }
               }
+            };
+    
+          window.onload = function() {
+            myChart = new Chart(ctx, config);
+          };
+    
+          $("#thirtyDaysBtn").click(function() {
+              var daysToShow = 30;
+              var new_dates = dates.slice(-daysToShow);
+              var new_prices = prices.slice(-daysToShow);
+              var data = myChart.config.data;
+              data.labels = new_dates;
+              data.datasets[0].data = new_prices;
+              data.datasets[0].label = '30 Days Stock Prices';
+              myChart.update();
+          });
+    
+          $("#sixtyDaysBtn").click(function() {
+              var daysToShow = 60;
+              var new_dates = dates.slice(-daysToShow);
+              var new_prices = prices.slice(-daysToShow);
+              var data = myChart.config.data;
+              data.labels = new_dates;
+              data.datasets[0].data = new_prices;
+              data.datasets[0].label = '60 Days Stock Prices';
+              myChart.update();
+          });
+    
+          $("#oneTwentyDaysBtn").click(function() {
+              var daysToShow = 120;
+              var new_dates = dates.slice(-daysToShow);
+              var new_prices = prices.slice(-daysToShow);
+              var data = myChart.config.data;
+              data.labels = new_dates;
+              data.datasets[0].data = new_prices;
+              data.datasets[0].label = '120 Days Stock Prices';
+              myChart.update();
+          });
+    
+          $("#allDataBtn").click(function() {
+              var new_dates = dates
+              var new_prices = prices
+              var data = myChart.config.data;
+              data.labels = new_dates;
+              data.datasets[0].data = new_prices;
+              data.datasets[0].label = 'All Days Stock Prices';
+              myChart.update();
+          });
+    
+            var slider = document.getElementById("default-range");
+            const dropdownButton = document.getElementById('algorithm-dropdown');
+            const dropdownList = document.getElementById('algorithm-dropdown-list');
+            const algorithmText = document.getElementById('algorithm-text');
+            const rangeInput = document.getElementById('default-range');
+            const output = document.getElementById('slider-value');
+            var algo = null;
+            var n_days = null;
+            var predictButton = document.getElementById('predict-button');
+            
+            dropdownButton.addEventListener('click', function () {
+              dropdownList.classList.toggle('hidden');
+            });
+    
+            function selectAlgorithm(algorithm) {
+              dropdownButton.innerText = algorithm;
+              algo = algorithm;
+              dropdownList.classList.add('hidden');
+    
+              if (algo === 'Lstm') {
+                rangeInput.setAttribute('max', '20');
+                rangeInput.setAttribute('value', '10');
+                output.innerHTML = rangeInput.value;
+              } else if (algo === 'Prophet') {
+                rangeInput.setAttribute('max', '120');
+                rangeInput.setAttribute('value', '60');
+                output.innerHTML = rangeInput.value;
+              }
             }
-          }
-        };
-
-      window.onload = function() {
-        myChart = new Chart(ctx, config);
-      };
-
-      $("#thirtyDaysBtn").click(function() {
-          var daysToShow = 30;
-          var new_dates = dates.slice(-daysToShow);
-          var new_prices = prices.slice(-daysToShow);
-          var data = myChart.config.data;
-          data.labels = new_dates;
-          data.datasets[0].data = new_prices;
-          data.datasets[0].label = '30 Days Stock Prices';
-          myChart.update();
-      });
-
-      $("#sixtyDaysBtn").click(function() {
-          var daysToShow = 60;
-          var new_dates = dates.slice(-daysToShow);
-          var new_prices = prices.slice(-daysToShow);
-          var data = myChart.config.data;
-          data.labels = new_dates;
-          data.datasets[0].data = new_prices;
-          data.datasets[0].label = '60 Days Stock Prices';
-          myChart.update();
-      });
-
-      $("#oneTwentyDaysBtn").click(function() {
-          var daysToShow = 120;
-          var new_dates = dates.slice(-daysToShow);
-          var new_prices = prices.slice(-daysToShow);
-          var data = myChart.config.data;
-          data.labels = new_dates;
-          data.datasets[0].data = new_prices;
-          data.datasets[0].label = '120 Days Stock Prices';
-          myChart.update();
-      });
-
-      $("#allDataBtn").click(function() {
-          var new_dates = dates
-          var new_prices = prices
-          var data = myChart.config.data;
-          data.labels = new_dates;
-          data.datasets[0].data = new_prices;
-          data.datasets[0].label = 'All Days Stock Prices';
-          myChart.update();
-      });
-
-        // var slider = document.getElementById("default-range");
-        // var output = document.getElementById("slider-value");
     
-        // output.innerHTML = slider.value;
+            predictButton.addEventListener('click', function() {
+              event.preventDefault(); // Prevent the default click behavior
     
-        // slider.oninput = function() {
-        //   output.innerHTML = this.value;
-        // }
+              // Get the selected algorithm value from the dropdown
+              var selectedAlgorithm = algo;
     
-        // var sliderToggle = document.getElementById("slider-toggle");
-        // var sliderContainer = document.getElementById("slider-container");
+              // Get the value from the slider
+              var selectedNDays = n_days;
     
-        // sliderToggle.addEventListener("click", function() {
-        //   sliderContainer.classList.toggle("hidden");
-        //   sliderToggle.innerText = sliderToggle.innerText === "Hide" ? "Show" : "Hide";
-        // });
+              var datesString = dates.join(",");
+              var pricesString = prices.join(",");
+    
+              // Construct the new href value
+              var newHref = "{% url 'core:result' %}?dates=" + encodeURIComponent(dates_json) + "&prices=" + encodeURIComponent(prices_json) + "&algorithm=" + encodeURIComponent(selectedAlgorithm) + "&n_days=" + encodeURIComponent(selectedNDays);
+    
+              // Update the href attribute
+              predictButton.href = newHref;
+    
+              // Navigate to the new URL
+              window.location.href = newHref;
+            });
+    
+            rangeInput.oninput = function() {
+              output.innerHTML = this.value;
+            };
+        
+            output.innerHTML = slider.value;
+        
+            slider.oninput = function() {
+              output.innerHTML = this.value;
+              n_days = this.value;
+              output.innerHTML = n_days;
+            }
+        
+            var sliderToggle = document.getElementById("slider-toggle");
+            var sliderContainer = document.getElementById("slider-container");
+        
+            sliderToggle.addEventListener("click", function() {
+              sliderContainer.classList.toggle("hidden");
+              sliderToggle.innerText = sliderToggle.innerText === "Hide" ? "Show" : "Hide";
+            });
+                 
     </script>
     
 

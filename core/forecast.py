@@ -1,6 +1,6 @@
 import pandas as pd
 from prophet import Prophet
-
+import json
 from django.contrib.auth.models import User
 from .models import PersonalPrediction
 
@@ -22,12 +22,16 @@ def forecast_prophet(dates, prices, n_days, Prediction_id=None):
     # Extract the predicted values and dates
     predicted_dates = forecast["ds"][-n_days:]
     predicted_prices = forecast["yhat"][-n_days:]
+    predicted_dates = [date.strftime("%Y-%m-%d") for date in predicted_dates]
+    predicted_prices = ["{:.7f}".format(price) for price in predicted_prices]
 
     if Prediction_id is not None:
         # Save predicted data to PersonalPrediction.predictedData
-        prediction = PersonalPrediction.objects.get(id=Prediction_id)
-        prediction.predictedData = list(zip(predicted_dates, predicted_prices))
-        prediction.save()
+        predicted_data = json.dumps(list(zip(predicted_dates, predicted_prices)))
+        PersonalPrediction.objects.filter(id=Prediction_id).update(
+            predictedData=predicted_data
+        )
+
     else:
         # Return the predicted values and dates
         return predicted_dates, predicted_prices

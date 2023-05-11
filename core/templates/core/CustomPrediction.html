@@ -85,6 +85,7 @@
       var ctx = document.getElementById('myChart').getContext('2d');
       var dates_json = "{{ dates }}";
       var prices_json = "{{ prices }}";
+      var predictionId = "{{ predictionId }}"
       var dates = JSON.parse(dates_json.replace(/&quot;/g, '"'));
       var prices = JSON.parse(prices_json.replace(/&quot;/g, '"'));
       var minPrice = Math.min(...prices);
@@ -217,7 +218,7 @@
           var pricesString = prices.join(",");
 
           // Construct the new href value
-          var newHref = "{% url 'core:result' %}?dates=" + encodeURIComponent(dates_json) + "&prices=" + encodeURIComponent(prices_json) + "&algorithm=" + encodeURIComponent(selectedAlgorithm) + "&n_days=" + encodeURIComponent(selectedNDays);
+          var newHref = "{% url 'core:result' %}?dates=" + encodeURIComponent(dates_json) + "&prices=" + encodeURIComponent(prices_json) + "&algorithm=" + encodeURIComponent(selectedAlgorithm) + "&n_days=" + encodeURIComponent(selectedNDays) + "&predictionId="+encodeURIComponent(predictionId);
 
           // Update the href attribute
           predictButton.href = newHref;
