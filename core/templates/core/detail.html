@@ -155,7 +155,7 @@
       var ctx = document.getElementById('myChart').getContext('2d');
       var dates_json = "{{ dates }}";
       var prices_json = "{{ prices }}";
-      var coinId = "{{ coin.id }}"
+      var coinId = "{{ coinId }}"
       var dates = JSON.parse(dates_json.replace(/&quot;/g, '"'));
       var prices = JSON.parse(prices_json.replace(/&quot;/g, '"'));
       var minPrice = Math.min(...prices);
