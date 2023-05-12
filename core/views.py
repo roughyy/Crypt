@@ -262,7 +262,7 @@ def CustomPrediction(request, personal_prediction_id):
     return render(
         request,
         "core/PageNotFound.html",
-        {"message": "Your'e not authorize to view this page"},
+        {"message": "You're not authorize to view this page"},
     )
 
 
@@ -270,10 +270,27 @@ def result(request):
     from .forecast import forecast_prophet, forecast_lstm
     from datetime import datetime
     import json
+    from .models import Cryptocurrencies, PersonalPrediction
+    from django.shortcuts import get_object_or_404
 
     if request.method == "POST":
         prediction_id = request.POST.get("predictionId")
         coin_id = request.POST.get("coinId")
+        info = None
+        if prediction_id is not None and prediction_id != "":
+            prediction_id = int(prediction_id)
+            info = get_object_or_404(PersonalPrediction, id=prediction_id)
+            print(info)
+        else:
+            prediction_id = None
+
+        if coin_id is not None and coin_id != "":
+            coin_id = int(coin_id)
+            info = get_object_or_404(Cryptocurrencies, id=coin_id)
+            print(info)
+        else:
+            coin_id = None
+
         dates = (
             request.POST.get("dates", "")
             .replace("[", "")
@@ -318,9 +335,8 @@ def result(request):
             "prices": json.dumps(prices),
             "predicted_dates": json.dumps(predicted_dates),
             "predicted_prices": json.dumps(predicted_prices),
-            "last_price": prices[
-                -1
-            ],  # Assuming last_price is the last element in prices
+            "last_price": prices[-1],
+            "info": info,
         }
 
         return render(request, "core/result.html", context)

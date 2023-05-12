@@ -699,10 +699,6 @@ video {
   margin-right: 1rem;
 }
 
-.mt-1 {
-  margin-top: 0.25rem;
-}
-
 .mt-10 {
   margin-top: 2.5rem;
 }
@@ -823,10 +819,6 @@ video {
   width: 25%;
 }
 
-.w-32 {
-  width: 8rem;
-}
-
 .w-4 {
   width: 1rem;
 }
@@ -909,14 +901,6 @@ video {
 
 .cursor-pointer {
   cursor: pointer;
-}
-
-.list-inside {
-  list-style-position: inside;
-}
-
-.list-disc {
-  list-style-type: disc;
 }
 
 .appearance-none {
