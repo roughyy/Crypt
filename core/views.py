@@ -284,7 +284,7 @@ def result(request):
         else:
             prediction_id = None
 
-        if coin_id is not None and coin_id != "":
+        if coin_id is not None and coin_id != "" and coin_id != "None":
             coin_id = int(coin_id)
             info = get_object_or_404(Cryptocurrencies, id=coin_id)
             print(info)

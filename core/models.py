@@ -35,9 +35,7 @@ class LSTMModel(models.Model):
     name = models.CharField(max_length=20)
     rmse = models.CharField(max_length=20)
     mape = models.CharField(max_length=20)
-    machineLearningModel = models.FileField(
-        upload_to="machineLearningModels", null=True
-    )
+    machineLearningModel = models.FileField(upload_to="LstmModel", null=True)
     updateDateTime = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -48,6 +46,7 @@ class ProphetScore(models.Model):
     name = models.CharField(max_length=20)
     rmse = models.CharField(max_length=20)
     mape = models.CharField(max_length=20)
+    machineLearningModel = models.FileField(upload_to="ProphetModel", null=True)
     createDateTime = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -83,18 +82,6 @@ class Cryptocurrencies(models.Model):
 
     def get_historicalData(self):
         return pd.read_json(self.historicalData)
-
-    def get_predictedData(self):
-        return pd.read_json(self.predictedData)
-
-
-class SystemPrediction(models.Model):
-    coinId = models.ForeignKey(Cryptocurrencies, on_delete=models.CASCADE)
-    predictedData = models.TextField()
-    createdDateTime = models.DateTimeField(auto_now_add=True)
-
-    def set_predictedData(self, df):
-        self.predictedData = df.to_json()
 
     def get_predictedData(self):
         return pd.read_json(self.predictedData)
