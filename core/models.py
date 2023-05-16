@@ -36,7 +36,7 @@ class LSTMModel(models.Model):
     rmse = models.CharField(max_length=20)
     mape = models.CharField(max_length=20)
     machineLearningModel = models.FileField(upload_to="LstmModel", null=True)
-    PredictedData = models.TextField(null=True, blank=True)
+    predictedData = models.TextField(null=True, blank=True)
     updateDateTime = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -66,26 +66,48 @@ def forecast_prophet(dates, prices, n_days, Prediction_id=None, coin_id=None):
     return predicted_dates, predicted_prices
 
 
+from contextlib import contextmanager
+import pathlib
+
+
+@contextmanager
+def set_posix_windows():
+    posix_backup = pathlib.PosixPath
+    try:
+        pathlib.PosixPath = pathlib.WindowsPath
+        yield
+    finally:
+        pathlib.PosixPath = posix_backup
+
+
 def forecast_lstm(dates, prices, coinId):
     lstm_info = Cryptocurrencies.objects.get(id=coinId).lstmId
     lstmId = lstm_info.id
     lstmModel = LSTMModel.objects.get(id=lstmId)
     model_path = str(lstmModel.machineLearningModel.path)
     print(model_path)
-    model = torch.load(model_path)
+
+    with set_posix_windows():
+        model = torch.load(model_path)
+
     df = pd.DataFrame({"ds": dates, "y": prices})
     df["unique_id"] = 1.0
     df = df[["unique_id", "ds", "y"]]
-    dataset, *_ = TimeSeriesDataset.from_dataframe(df)
+    dataset, *_ = TimeSeriesDataset.from_df(df)
     predictedPrice = model.predict(dataset=dataset)
 
     current_date = datetime.now().date()
     start_date = current_date + timedelta(days=1)
     dates = pd.date_range(start=start_date, periods=len(predictedPrice), freq="D")
-    df_predicted = pd.DataFrame({"Dates": dates, "Predicted": predictedPrice.flatten()})
-    lstmModel.update.predictedData(df_predicted.to_json())
-    predicted_dates = df_predicted["Dates"].dt.strftime("%Y-%m-%d").tolist()
-    predicted_prices = df_predicted["Predicted"].tolist()
+    df_predicted = pd.DataFrame({"Date": dates, "Close": predictedPrice.flatten()})
+    df_predicted["Date"] = df_predicted["Date"].dt.strftime(
+        "%Y-%m-%d"
+    )  # Convert to string format
+    predicted_data = df_predicted.to_dict(orient="records")
+    LSTMModel.objects.filter(id=lstmId).update(predictedData=json.dumps(predicted_data))
+
+    predicted_dates = [data["Date"] for data in predicted_data]
+    predicted_prices = [data["Close"] for data in predicted_data]
 
     return predicted_dates, predicted_prices
 
@@ -93,22 +115,31 @@ def forecast_lstm(dates, prices, coinId):
 def forecast_NHits(dates, prices, coinId):
     NHits_info = Cryptocurrencies.objects.get(id=coinId).lstmId
     NhitsId = NHits_info.id
-    NHitsModel = NHitsModel.objects.get(id=NhitsId)
-    model_path = str(NHitsModel.machineLearningModel.path)
-    print(model_path)
-    model = torch.load(model_path)
+    nHitsModel = NHitsModel.objects.get(id=NhitsId)
+    model_path = str(nHitsModel.machineLearningModel.path)
+
+    with set_posix_windows():
+        model = torch.load(model_path)
+
     df = pd.DataFrame({"ds": dates, "y": prices})
     df["unique_id"] = 1.0
     df = df[["unique_id", "ds", "y"]]
-    dataset, *_ = TimeSeriesDataset.from_dataframe(df)
+    dataset, *_ = TimeSeriesDataset.from_df(df)
     predictedPrice = model.predict(dataset=dataset)
 
     current_date = datetime.now().date()
     start_date = current_date + timedelta(days=1)
     dates = pd.date_range(start=start_date, periods=len(predictedPrice), freq="D")
-    df_predicted = pd.DataFrame({"Dates": dates, "Predicted": predictedPrice.flatten()})
-    NHitsModel.update.predictedData(df_predicted.to_json())
-    predicted_dates = df_predicted["Dates"].dt.strftime("%Y-%m-%d").tolist()
-    predicted_prices = df_predicted["Predicted"].tolist()
+    df_predicted = pd.DataFrame({"Date": dates, "Close": predictedPrice.flatten()})
+    df_predicted["Date"] = df_predicted["Date"].dt.strftime(
+        "%Y-%m-%d"
+    )  # Convert to string format
+    predicted_data = df_predicted.to_dict(orient="records")
+    NHitsModel.objects.filter(id=NhitsId).update(
+        predictedData=json.dumps(predicted_data)
+    )
+
+    predicted_dates = [data["Date"] for data in predicted_data]
+    predicted_prices = [data["Close"] for data in predicted_data]
 
     return predicted_dates, predicted_prices
