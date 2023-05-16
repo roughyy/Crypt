@@ -111,49 +111,12 @@
           </li>
         </ul>
       </div>
-      <label
-        for="default-range"
-        class="block mt-6 text-lg font-medium text-white"
-        >Pick day range</label
-      >
-      <input
-        id="default-range"
-        type="range"
-        min="0"
-        max="20"
-        value="10"
-        step="1"
-        class="w-64 h-2 bg-gray-200 rounded-lg cursor-pointer appearance-none"
-      />
-      <span id="slider-value" class="text-white text-lg mt-2"></span>
       <a href="" class="py-4 px-6 mt-6 text-white text-2xl bg-rose-500 hover:bg-rose-900 rounded-xl w-64" id="predict-button">
         Predict
       </a>
     </div>
   </div>  
 </div>
-
-<style>
-  #default-range::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background-color: rgb(190 18 60);/* change this to rose-700 */
-    cursor: pointer;
-  }
-
-  #default-range::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border: 0;
-    border-radius: 50%;
-    background-color: rgb(190 18 60);/* change this to rose-700 */
-
-    cursor: pointer;
-  }
-</style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -260,7 +223,7 @@
         const rangeInput = document.getElementById('default-range');
         const output = document.getElementById('slider-value');
         var algo = null;
-        var n_days = null;
+        var n_days = 60;
         var predictButton = document.getElementById('predict-button');
         
         dropdownButton.addEventListener('click', function () {
@@ -271,16 +234,6 @@
           dropdownButton.innerText = algorithm;
           algo = algorithm;
           dropdownList.classList.add('hidden');
-
-          if (algo === 'Lstm') {
-            rangeInput.setAttribute('max', '20');
-            rangeInput.setAttribute('value', '10');
-            output.innerHTML = rangeInput.value;
-          } else if (algo === 'Prophet') {
-            rangeInput.setAttribute('max', '120');
-            rangeInput.setAttribute('value', '60');
-            output.innerHTML = rangeInput.value;
-          }
         }
 
         predictButton.addEventListener('click', function(event) {

@@ -76,7 +76,7 @@ class Cryptocurrencies(models.Model):
     categoryId = models.ForeignKey(CoinCategory, on_delete=models.CASCADE)
     lastPrice = models.CharField(max_length=30, null=True)
     historicalData = models.TextField(null=True, blank=True)
-    lstmModelId = models.ForeignKey(
+    lstmId = models.ForeignKey(
         LSTMModel, on_delete=models.CASCADE, blank=True, null=True
     )
     prophetId = models.ForeignKey(

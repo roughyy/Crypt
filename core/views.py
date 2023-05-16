@@ -115,10 +115,11 @@ def detail(request):
 
             if lastUpdated == currentDate:
                 historical_data = coin.get_historicalData()
-                historical_data.index = pd.to_datetime(
-                    historical_data.index
-                )  # Convert index to DatetimeIndex
-                dates = list(historical_data.index.strftime("%Y-%m-%d"))
+                historical_data = historical_data.reset_index()[["Date", "Close"]]
+                historical_data["Date"] = historical_data["Date"].apply(
+                    lambda x: datetime.strftime(x, "%Y-%m-%d")
+                )
+                dates = list(historical_data["Date"])
                 prices = list(historical_data["Close"])
                 coin_info = coin
 
@@ -267,7 +268,7 @@ def CustomPrediction(request, personal_prediction_id):
 
 
 def result(request):
-    from .forecast import forecast_prophet, forecast_lstm
+    from .forecast import forecast_prophet, forecast_lstm, forecast_NHits
     from datetime import datetime
     import json
     from .models import Cryptocurrencies, PersonalPrediction
@@ -316,15 +317,15 @@ def result(request):
         # Call the appropriate forecast function based on the selected algorithm
         if algorithm == "Prophet":
             predicted_dates, predicted_prices = forecast_prophet(
-                dates, prices, n_days, Prediction_id=prediction_id, coinId=coin_id
+                dates, prices, n_days, Prediction_id=prediction_id, coin_id=coin_id
             )
         elif algorithm == "Lstm":
             predicted_dates, predicted_prices = forecast_lstm(
-                dates, prices, n_days, coinId=coin_id
+                dates, prices, coinId=coin_id
             )
         elif algorithm == "NHits":
-            predicted_dates, predicted_prices = forecast_lstm(
-                dates, prices, n_days, coinId=coin_id
+            predicted_dates, predicted_prices = forecast_NHits(
+                dates, prices, coinId=coin_id
             )
         else:
             return render(

@@ -16,10 +16,13 @@ def forecast_prophet(dates, prices, n_days, Prediction_id=None, coin_id=None):
     prophetId = None
 
     # Create a Prophet model and fit it to the data
-    if coin_id == None:
-        prophetId = Cryptocurrencies.objects.get(id=coin_id).prophetId
-        model = model_from_json(prophetId.machineLearningModel)
-        model.fit(df)
+    if coin_id is not None:
+        model_info = Cryptocurrencies.objects.get(id=coin_id).prophetId
+        prophetId = model_info.id
+        model_file_path = model_info.machineLearningModel.path
+        with open(model_file_path, "r") as fin:
+            model = model_from_json(fin.read())
+
     else:
         model = Prophet()
         model.fit(df)
@@ -54,7 +57,7 @@ def forecast_prophet(dates, prices, n_days, Prediction_id=None, coin_id=None):
         ]
         predicted_data_json = json.dumps(predicted_data)
         ProphetModel.objects.filter(id=prophetId).update(
-            predicted_data=predicted_data_json
+            predictedData=predicted_data_json
         )
     else:
         # Return the predicted values and dates
@@ -64,9 +67,12 @@ def forecast_prophet(dates, prices, n_days, Prediction_id=None, coin_id=None):
 
 
 def forecast_lstm(dates, prices, coinId):
-    lstmId = Cryptocurrencies.objects.get(id=coinId).lstmId
+    lstm_info = Cryptocurrencies.objects.get(id=coinId).lstmId
+    lstmId = lstm_info.id
     lstmModel = LSTMModel.objects.get(id=lstmId)
-    model = torch.load(lstmModel.machineLearningModel)
+    model_path = str(lstmModel.machineLearningModel.path)
+    print(model_path)
+    model = torch.load(model_path)
     df = pd.DataFrame({"ds": dates, "y": prices})
     df["unique_id"] = 1.0
     df = df[["unique_id", "ds", "y"]]
@@ -77,16 +83,20 @@ def forecast_lstm(dates, prices, coinId):
     start_date = current_date + timedelta(days=1)
     dates = pd.date_range(start=start_date, periods=len(predictedPrice), freq="D")
     df_predicted = pd.DataFrame({"Dates": dates, "Predicted": predictedPrice.flatten()})
+    lstmModel.update.predictedData(df_predicted.to_json())
     predicted_dates = df_predicted["Dates"].dt.strftime("%Y-%m-%d").tolist()
-    predicted_prices = df_predicted["predcited"].tolist()
+    predicted_prices = df_predicted["Predicted"].tolist()
 
     return predicted_dates, predicted_prices
 
 
 def forecast_NHits(dates, prices, coinId):
-    NhitesId = Cryptocurrencies.objects.get(id=coinId).nHitsId
-    nHitsModel = NHitsModel.objects.get(id=NhitesId)
-    model = torch.load(nHitsModel.machineLearningModel)
+    NHits_info = Cryptocurrencies.objects.get(id=coinId).lstmId
+    NhitsId = NHits_info.id
+    NHitsModel = NHitsModel.objects.get(id=NhitsId)
+    model_path = str(NHitsModel.machineLearningModel.path)
+    print(model_path)
+    model = torch.load(model_path)
     df = pd.DataFrame({"ds": dates, "y": prices})
     df["unique_id"] = 1.0
     df = df[["unique_id", "ds", "y"]]
@@ -97,7 +107,8 @@ def forecast_NHits(dates, prices, coinId):
     start_date = current_date + timedelta(days=1)
     dates = pd.date_range(start=start_date, periods=len(predictedPrice), freq="D")
     df_predicted = pd.DataFrame({"Dates": dates, "Predicted": predictedPrice.flatten()})
+    NHitsModel.update.predictedData(df_predicted.to_json())
     predicted_dates = df_predicted["Dates"].dt.strftime("%Y-%m-%d").tolist()
-    predicted_prices = df_predicted["predcited"].tolist()
+    predicted_prices = df_predicted["Predicted"].tolist()
 
     return predicted_dates, predicted_prices

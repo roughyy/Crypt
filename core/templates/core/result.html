@@ -44,6 +44,7 @@
     var prices = JSON.parse(prices_json.replace(/&quot;/g, '"'));
     var predicted_dates = JSON.parse(predicted_dates_json.replace(/&quot;/g, '"'));
     var predicted_prices = JSON.parse(predicted_price_json.replace(/&quot;/g, '"'));
+    var last_price = '{{ last_price }}';
     var minPrice = Math.min(...prices, ...predicted_prices);
     var gradient = ctx.createLinearGradient(0, 0, 0, 400);
     gradient.addColorStop(0, 'rgba(255, 99, 132, 0.9)');
@@ -52,6 +53,7 @@
     prices = prices.slice(-60);
     var combinedDates = [...dates, ...predicted_dates];
     var nullArray = new Array(59).fill(null);
+    predicted_prices.unshift(last_price);
     predicted_prices = nullArray.concat(predicted_prices)
 
 
