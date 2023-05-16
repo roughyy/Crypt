@@ -316,9 +316,13 @@ def result(request):
         # Call the appropriate forecast function based on the selected algorithm
         if algorithm == "Prophet":
             predicted_dates, predicted_prices = forecast_prophet(
-                dates, prices, n_days, Prediction_id=prediction_id
+                dates, prices, n_days, Prediction_id=prediction_id, coinId=coin_id
             )
         elif algorithm == "Lstm":
+            predicted_dates, predicted_prices = forecast_lstm(
+                dates, prices, n_days, coinId=coin_id
+            )
+        elif algorithm == "NHits":
             predicted_dates, predicted_prices = forecast_lstm(
                 dates, prices, n_days, coinId=coin_id
             )
