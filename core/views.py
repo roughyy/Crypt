@@ -353,6 +353,81 @@ def result(request):
 
 
 def profile(request):
+    from .models import PersonalPrediction
+    import json
+    import datetime
+    import pandas as pd
+    from datetime import datetime
+
+    if request.user.is_authenticated:
+        list_predictions = PersonalPrediction.objects.filter(
+            userId=request.user.id
+        ).order_by("-id")
+
+        for prediction in list_predictions:
+            if prediction.predictedData:
+                predicted_data = prediction.get_predictedData()
+                predicted_data = pd.DataFrame(predicted_data)
+                predicted_dates = (
+                    predicted_data["Date"].dt.strftime("%Y-%m-%d").tolist()
+                )
+                predicted_prices = predicted_data["Close"].tolist()
+                prediction.predicted_dates = json.dumps(predicted_dates)
+                prediction.predicted_prices = json.dumps(predicted_prices)
+
+                # Retrieve the last price from the CSV file
+                csv_data = pd.read_csv(prediction.CSVFile, sep=";")
+                last_csv_price = csv_data["close"].iloc[-1]
+                last_csv_date = csv_data["timestamp"].iloc[-1]
+                last_csv_date = last_csv_date.split("T")[0]
+
+                # Retrieve the last price from the predicted data
+                last_predicted_price = predicted_prices[-1]
+                last_predicted_date = predicted_data["Date"].iloc[-1]
+
+                # Assign additional fields to the prediction object
+                prediction.last_csv_price = last_csv_price
+                prediction.last_csv_date = last_csv_date
+                prediction.last_predicted_price = last_predicted_price
+                prediction.last_predicted_date = last_predicted_date
+
+        latest_prediction = list_predictions.first()
+
+        if latest_prediction and latest_prediction.predictedData:
+            # Get the predicted data
+            predicted_data = latest_prediction.get_predictedData()
+            predicted_data = pd.DataFrame(predicted_data)
+            data = latest_prediction.CSVFile
+            data = pd.read_csv(data.path, sep=";")
+            dates = data["timestamp"].tolist()
+            dates = [
+                datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%Y-%m-%d")
+                for date in dates
+            ]
+            prices = data["close"].tolist()
+
+            # Split the predicted data into lists of dates and prices
+            predicted_dates = predicted_data["Date"].dt.strftime("%Y-%m-%d").tolist()
+            predicted_prices = predicted_data["Close"].tolist()
+
+            # Add necessary fields to the context
+            context = {
+                "list_predictions": list_predictions,
+                "latest_prediction": latest_prediction,
+                "file_name": latest_prediction.CSVFile.name,
+                "last_data_price": prices,
+                "last_data_dates": dates,
+                "predicted_dates": json.dumps(predicted_dates),
+                "predicted_prices": json.dumps(predicted_prices),
+            }
+        else:
+            # No latest prediction found
+            context = {
+                "list_predictions": list_predictions,
+            }
+
+        return render(request, "core/profile.html", context=context)
+
     return render(request, "core/profile.html")
 
 

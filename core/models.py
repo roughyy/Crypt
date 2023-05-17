@@ -18,6 +18,10 @@ class PersonalPrediction(models.Model):
     def get_predictedData(self):
         return pd.read_json(self.predictedData)
 
+    @property
+    def file_name(self):
+        return self.CSVFile.name
+
 
 class UserHistory(models.Model):
     userId = models.ForeignKey(User, on_delete=models.CASCADE)
