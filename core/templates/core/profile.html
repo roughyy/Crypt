@@ -8,32 +8,108 @@
 <div class="place-content-center">
   <div class="container mx-auto flex items-center justify-center">
     <div class="flex flex-row w-10/12">
-      <div class="bg-gradient-to-tr from-transparent to-base-blue rounded-xl h-screen w-3/12">
-        <ul class="text-white mt-5 ml-5">
+      <div class="bg-transparent rounded-xl h-screen w-3/12 shadow-xl ">
+        <ul class="text-white mx-2">
           {% for prediction in list_predictions %}
-          <a class="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 px-4 py-4 mx-3 my-3">
-            <h5 class="mb-2 text-sm font-bold tracking-tight text-gray-900 dark:text-white">{{ prediction.file_name }}</h5>
-            <br>
+          <a href="{% url 'core:CustomPrediction' prediction.id %}" class="block max-w-sm bg-gradient-to-tr from-transparent to-base-dark-light bg-opacity-20 border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 px-4 py-4 mt-2">
+            <h5 class="mb-2 text-sm font-semibold tracking-tight text-gray-900 dark:text-white">{{ prediction.file_name }}</h5>
             <p class="font-normal text-gray-700 dark:text-gray-400">{{ prediction.last_csv_date }} at {{ prediction.last_csv_price|floatformat:2|intcomma }}</p>
-            <br>
-            <p class="font-normal text-gray-700 dark:text-gray-400">{{ Prediction.last_predicted_date }} at {{ prediction.last_predicted_price|floatformat:2|intcomma }}</p>
+            {% if prediction.last_predicted_price > prediction.last_csv_price %}
+              <p class="font-normal text-green-500">{{ prediction.last_predicted_date }} at {{ prediction.last_predicted_price|floatformat:2|intcomma }}</p>
+            {% elif prediction.last_predicted_price < prediction.last_csv_price %}
+              <p class="font-normal text-red-500">{{ prediction.last_predicted_date }} at {{ prediction.last_predicted_price|floatformat:2|intcomma }}</p>
+            {% else %}
+              <p class="font-normal">{{ prediction.last_predicted_date }} at {{ prediction.last_predicted_price|floatformat:2|intcomma }}</p>
+            {% endif %}
           </a>
           <br>
           {% endfor %}
         </ul>
       </div>
-      <div class="flex flex-col ml-4 w-9/12">
-        <div class="text-white text-3xl font-bold my-4 mx-5">
-          History
+      <div class="flex flex-col ml-4 w-9/12 bg-transparent shadow-lg">
+        <div class="text-white text-xl font-bold my-4 mx-5">
+          {{ file_name }}
         </div>
-        <div class="bg-gray-800 rounded-xl flex-1 shadow-xl">
-          
-        </div>
+        <div class="bg-gradient-to-tr from-transparent to-base-dark-light flex-1 shadow-xl rounded-xl border-white">
+          <div class="w-full px-10 py-6">
+            <canvas id="myChart"></canvas>
+          </div>
+        </div>           
       </div>
     </div>
   </div>
 </div>
 
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  var myChart;
+  var ctx = document.getElementById('myChart').getContext('2d');
+  var dates = JSON.parse('{{ dates|safe }}');
+  var prices = JSON.parse('{{ prices|safe }}');
+  var predicted_dates = JSON.parse('{{ predicted_dates|safe }}');
+  var predicted_prices = JSON.parse('{{ predicted_prices|safe }}');
+  var minPrice = Math.min(...prices, ...predicted_prices);
+  var gradient = ctx.createLinearGradient(0, 0, 0, 400);
+  gradient.addColorStop(0, 'rgba(255, 99, 132, 0.9)');
+  gradient.addColorStop(1, 'rgba(255, 99, 132, 0)');
+  var combinedDates = [...dates, ...predicted_dates];
+  var nullArray = new Array(59).fill(null);
+  var last_price = prices[prices.length - 1];
+  predicted_prices = [last_price].concat(predicted_prices);
+  predicted_prices = nullArray.concat(predicted_prices)
+
+
+  var lastActualPrice = prices[prices.length - 1];
+  var predictedBorderColor = predicted_prices[predicted_prices.length - 1] > lastActualPrice ? 'rgba(0, 255, 0, 1)' : 'rgba(255, 255, 0, 1)';
+
+  var config = {
+    type: 'line',
+    data: {
+      labels: combinedDates,
+      datasets: [{
+        label: 'Actual Prices',
+        data: prices, // Use only the past 60 prices
+        borderColor: 'rgba(255, 99, 132, 1)', // Color for previous prices line
+        borderWidth: 1,
+        fill: true,
+        tension: 0.4,
+        backgroundColor: 'rgba(255, 99, 132, 0.2)', // Background color for previous prices area
+      }, {
+        label: 'Predicted Prices',
+        data: predicted_prices, // Use the predicted prices
+        borderColor: 'rgba(54, 162, 235, 1)', // Color for predicted prices line
+        borderWidth: 1,
+        fill: true,
+        tension: 0.4,
+        backgroundColor: 'rgba(54, 162, 235, 0.2)', // Background color for predicted prices area
+      }]
+    },
+    options: {
+      scales: {
+        x: {
+          ticks: {
+            color: 'white'
+          }
+        },
+        y: {
+          min: Math.floor(minPrice * 0.95 / 10) * 10,
+          ticks: {
+            callback: function(value, index, values) {
+              return '$' + value.toFixed(2);
+            },
+            color: 'white'
+          }
+        }
+      }
+    }
+  };
+  window.onload = function() {
+    myChart = new Chart(ctx, config);
+  };
+</script>
 
 
 {% endblock %}

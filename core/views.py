@@ -357,7 +357,6 @@ def profile(request):
     import json
     import datetime
     import pandas as pd
-    from datetime import datetime
 
     if request.user.is_authenticated:
         list_predictions = PersonalPrediction.objects.filter(
@@ -383,7 +382,9 @@ def profile(request):
 
                 # Retrieve the last price from the predicted data
                 last_predicted_price = predicted_prices[-1]
-                last_predicted_date = predicted_data["Date"].iloc[-1]
+                last_predicted_date = (
+                    predicted_data["Date"].iloc[-1].strftime("%Y-%m-%d")
+                )
 
                 # Assign additional fields to the prediction object
                 prediction.last_csv_price = last_csv_price
@@ -401,23 +402,40 @@ def profile(request):
             data = pd.read_csv(data.path, sep=";")
             dates = data["timestamp"].tolist()
             dates = [
-                datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%Y-%m-%d")
+                datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ").strftime(
+                    "%Y-%m-%d"
+                )
                 for date in dates
             ]
             prices = data["close"].tolist()
 
+            # Slice the arrays if needed to include only the last 60 data points
+            if len(dates) > 60:
+                dates = dates[-60:]
+                prices = prices[-60:]
+
             # Split the predicted data into lists of dates and prices
             predicted_dates = predicted_data["Date"].dt.strftime("%Y-%m-%d").tolist()
             predicted_prices = predicted_data["Close"].tolist()
+
+            # Format the dates consistently
+            formatted_dates = [date for date in dates]
+            formatted_predicted_dates = [date for date in predicted_dates]
+
+            # Combine the dates arrays
+            combined_dates = formatted_dates + formatted_predicted_dates
+
+            print(list_predictions)
 
             # Add necessary fields to the context
             context = {
                 "list_predictions": list_predictions,
                 "latest_prediction": latest_prediction,
                 "file_name": latest_prediction.CSVFile.name,
-                "last_data_price": prices,
-                "last_data_dates": dates,
-                "predicted_dates": json.dumps(predicted_dates),
+                "prices": json.dumps(prices),
+                "dates": json.dumps(formatted_dates),
+                "predicted_dates": json.dumps(formatted_predicted_dates),
+                "combined_dates": json.dumps(combined_dates),
                 "predicted_prices": json.dumps(predicted_prices),
             }
         else:
