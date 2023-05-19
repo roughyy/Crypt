@@ -14,6 +14,11 @@ urlpatterns = [
     path("logout/", views.logoutUser, name="logout"),
     path("profile/", views.profile, name="profile"),
     path("result/", views.result, name="result"),
+    path(
+        "pastPrediction/<int:personal_prediction_id>/",
+        views.pastPrediction,
+        name="pastPrediction",
+    ),
     path("404/<message>", views.PageNotFound, name="404"),
     path(
         "CustomPrediction/<int:personal_prediction_id>/",

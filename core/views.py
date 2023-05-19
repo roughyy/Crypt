@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from .forms import CreateUserForm
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.db import transaction
 from django.utils import timezone
 from django.http import HttpResponse
@@ -68,6 +68,7 @@ def about(request):
     return render(request, "core/about.html")
 
 
+@login_required(login_url="core:login")
 def search(request):
     from .models import Cryptocurrencies
     import yfinance as yf
@@ -97,6 +98,7 @@ def search(request):
     return render(request, "core/search.html")
 
 
+@login_required(login_url="core:login")
 def detail(request):
     import yfinance as yf
     import json
@@ -207,6 +209,7 @@ def detail(request):
         )
 
 
+@login_required(login_url="core:login")
 def upload(request):
     from .models import PersonalPrediction
     from .forms import UploadFile
@@ -232,6 +235,7 @@ def upload(request):
     return render(request, "core/upload.html", {"form": form})
 
 
+@login_required(login_url="core:login")
 def CustomPrediction(request, personal_prediction_id):
     from .models import PersonalPrediction
     import pandas as pd
@@ -267,6 +271,7 @@ def CustomPrediction(request, personal_prediction_id):
     )
 
 
+@login_required(login_url="core:login")
 def result(request):
     from .forecast import forecast_prophet, forecast_lstm, forecast_NHits
     from datetime import datetime
@@ -352,6 +357,7 @@ def result(request):
     )
 
 
+@login_required(login_url="core:login")
 def profile(request):
     from .models import PersonalPrediction
     import json
@@ -447,6 +453,72 @@ def profile(request):
         return render(request, "core/profile.html", context=context)
 
     return render(request, "core/profile.html")
+
+
+def pastPrediction(request, personal_prediction_id):
+    from .models import PersonalPrediction
+    from django.contrib.auth.models import User
+    import json
+    import datetime
+    import pandas as pd
+
+    if request.user.is_authenticated:
+        personal_prediction = PersonalPrediction.objects.get(id=personal_prediction_id)
+        user = User.objects.get(username=personal_prediction.userId)
+        print(request.user.username)
+        print(personal_prediction.userId)
+        if request.user.id != user.id:
+            return render(
+                request,
+                "core/PageNotFound.html",
+                {"message": "You are not authorized to view this page"},
+            )
+        else:
+            # Get the predicted data
+            predicted_data = personal_prediction.get_predictedData()
+            predicted_data = pd.DataFrame(predicted_data)
+            data = personal_prediction.CSVFile
+            data = pd.read_csv(data.path, sep=";")
+            dates = data["timestamp"].tolist()
+            dates = [
+                datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ").strftime(
+                    "%Y-%m-%d"
+                )
+                for date in dates
+            ]
+            prices = data["close"].tolist()
+
+            # Slice the arrays if needed to include only the last 60 data points
+            if len(dates) > 120:
+                dates = dates[-60:]
+                prices = prices[-60:]
+
+            # Split the predicted data into lists of dates and prices
+            predicted_dates = predicted_data["Date"].dt.strftime("%Y-%m-%d").tolist()
+            predicted_prices = predicted_data["Close"].tolist()
+
+            # Format the dates consistently
+            formatted_dates = [date for date in dates]
+            formatted_predicted_dates = [date for date in predicted_dates]
+
+            # Combine the dates arrays
+            combined_dates = formatted_dates + formatted_predicted_dates
+
+            # Add necessary fields to the context
+            context = {
+                "file_name": personal_prediction.CSVFile.name,
+                "prices": json.dumps(prices),
+                "dates": json.dumps(formatted_dates),
+                "last_csv_price": prices[-1],
+                "last_predicted_price": predicted_prices[-1],
+                "predicted_dates": json.dumps(formatted_predicted_dates),
+                "combined_dates": json.dumps(combined_dates),
+                "predicted_prices": json.dumps(predicted_prices),
+            }
+
+            return render(request, "core/pastPrediction.html", context=context)
+
+    return render(request, "core/pastPrediction.html")
 
 
 from django.http import HttpResponseNotFound

@@ -11,7 +11,7 @@
       <div class="bg-transparent rounded-xl h-screen w-3/12 shadow-xl ">
         <ul class="text-white mx-2">
           {% for prediction in list_predictions %}
-          <a href="{% url 'core:CustomPrediction' prediction.id %}" class="block max-w-sm bg-gradient-to-tr from-transparent to-base-dark-light bg-opacity-20 border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 px-4 py-4 mt-2">
+          <a href="{% url 'core:pastPrediction' prediction.id %}" class="block max-w-sm bg-gradient-to-tr from-transparent to-base-dark-light bg-opacity-20 border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 px-4 py-4 mt-2">
             <h5 class="mb-2 text-sm font-semibold tracking-tight text-gray-900 dark:text-white">{{ prediction.file_name }}</h5>
             <p class="font-normal text-gray-700 dark:text-gray-400">{{ prediction.last_csv_date }} at {{ prediction.last_csv_price|floatformat:2|intcomma }}</p>
             {% if prediction.last_predicted_price > prediction.last_csv_price %}
