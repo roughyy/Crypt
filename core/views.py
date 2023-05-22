@@ -276,6 +276,7 @@ def CustomPrediction(request, personal_prediction_id):
                 "prices": json.dumps(prices),
                 "last_price": last_price,
                 "predictionId": personal_prediction_id,
+                "info": personal_prediction,
             }
             return render(request, "core/CustomPrediction.html", context=context)
 
@@ -360,7 +361,8 @@ def result(request):
             "prices": json.dumps(prices),
             "predicted_dates": json.dumps(predicted_dates),
             "predicted_prices": json.dumps(predicted_prices),
-            "last_price": prices[-1],
+            "last_price": float(prices[-1]),
+            "last_predicted_price": float(predicted_prices[-1]),
             "info": info,
         }
 
@@ -380,9 +382,14 @@ def profile(request):
     import pandas as pd
 
     if request.user.is_authenticated:
-        list_predictions = PersonalPrediction.objects.filter(
-            userId=request.user.id
-        ).order_by("-id")
+        list_predictions = (
+            PersonalPrediction.objects.filter(userId=request.user.id)
+            .exclude(predictedData=None)
+            .order_by("-id")
+        )
+
+        if not list_predictions:
+            return render(request, "core/PageNotFound.html", {"message": "No Data"})
 
         for prediction in list_predictions:
             if prediction.predictedData:

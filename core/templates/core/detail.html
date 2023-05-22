@@ -10,20 +10,21 @@
   {% endif %}
 <div class="flex w-full h-screen">
   <div class="w-8/12 px-12">
-    <div class="text-3xl text-white flex items-center font-semibold">
-      <div class="flex flex-col ml-20">
+    <div class="text-3xl text-white flex flex-col font-semibold">
+      <div class="data-container ml-20">
         <div class="flex items-center">
           {% if info.logoImage %}
-        <img
-          class="h-9 w-9 inline-flex mr-3"
-          src="{{ request.scheme }}://{{ request.get_host }}/{{info.logoImage}}"
-          alt="{{ info.coinName }}"
-        />
-        {% endif %}
-        <h1>{{ info.coinName }}</h1>
-        <p class="text-2xl ml-10">${{ info.lastPrice|floatformat:2|intcomma }}</p>
+            <img
+              class="h-9 w-9 inline-flex mr-3"
+              src="{{ request.scheme }}://{{ request.get_host }}/{{info.logoImage}}"
+              alt="{{ info.coinName }}"
+            />
+          {% endif %}
+          <h1>{{ info.coinName }}</h1>
+          <p class="text-2xl ml-10">${{ info.lastPrice|floatformat:2|intcomma }}</p>
         </div>
-          <div class="inline-flex rounded-md shadow-sm py-5 w-full" role="group">
+        <div class="flex items-center">
+          <div class="inline-flex rounded-md shadow-sm py-5">
             <button
               type="button"
               id="thirtyDaysBtn"
@@ -54,6 +55,7 @@
             </button>
           </div>
         </div>
+      </div>
       </div>
     <div class="w-full px-10 py-6">
       <canvas id="myChart"></canvas>
@@ -92,7 +94,7 @@
             <a
               href="#"
               class="block px-4 py-2 text-lg text-gray-700 hover:bg-gray-100 hover:text-blue-700"
-              onclick="selectAlgorithm('Lstm')"
+              {% if info.logoImage %}onclick="selectAlgorithm('Lstm')" {% else %}disabled{% endif %}
               >LSTM</a
             >
           </li>
@@ -100,7 +102,7 @@
             <a
               href="#"
               class="block px-4 py-2 text-lg text-gray-700 hover:bg-gray-100 hover:text-blue-700"
-              onclick="selectAlgorithm('NHits')"
+              {% if info.logoImage %}onclick="selectAlgorithm('NHits')" {% else %}disabled{% endif %}
               >NHits</a
             >
           </li>
@@ -248,18 +250,23 @@
             performanceContent = '<h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">LSTM Performance</h5>';
             // Add the specific performance metrics for LSTM
             performanceContent += '<p class="font-normal text-gray-700 dark:text-gray-400">RMSE = {{ lstmInfo.rmse }}</p>';
-            performanceContent += '<p class="font-normal text-gray-700 dark:text-gray-400">RMSE = {{ lstmInfo.mape }}</p>';
+            performanceContent += '<p class="font-normal text-gray-700 dark:text-gray-400">MAPE = {{ lstmInfo.mape }}%</p>';
             // Add the specific performance metrics for LSTM
           } else if (algorithm === 'Prophet') {
             performanceContent = '<h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Prophet Performance</h5>';
             // Add the specific performance metrics for Prophet
-            performanceContent += '<p class="font-normal text-gray-700 dark:text-gray-400">RMSE = {{ prophetInfo.rmse }}</p>';
-            performanceContent += '<p class="font-normal text-gray-700 dark:text-gray-400">RMSE = {{ prophetInfo.mape }}</p>';
+            '{% if prophetInfo.rmse and prophetInfo.mape %}'
+              performanceContent += '<p class="font-normal text-gray-700 dark:text-gray-400">RMSE = {{ prophetInfo.rmse }}</p>';
+              performanceContent += '<p class="font-normal text-gray-700 dark:text-gray-400">MAPE = {{ prophetInfo.mape }}%</p>';
+            '{% else %}'
+              performanceContent += '<p class="font-normal text-gray-700 dark:text-gray-400">RMSE = No Data</p>';
+              performanceContent += '<p class="font-normal text-gray-700 dark:text-gray-400">MAPE = No Data</p>';
+            '{% endif %}'
           } else if (algorithm === 'NHits') {
             performanceContent = '<h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">NHits Performance</h5>';
             // Add the specific performance metrics for NHits
             performanceContent += '<p class="font-normal text-gray-700 dark:text-gray-400">RMSE = {{ nhitsInfo.rmse }}</p>';
-            performanceContent += '<p class="font-normal text-gray-700 dark:text-gray-400">RMSE = {{ nhitsInfo.mape }}</p>';
+            performanceContent += '<p class="font-normal text-gray-700 dark:text-gray-400">MAPE = {{ nhitsInfo.mape }}%</p>';
           }
           // Update the content of the performance card
           performanceCard.innerHTML = performanceContent;

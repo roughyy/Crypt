@@ -24,7 +24,15 @@ def forecast_prophet(dates, prices, n_days, Prediction_id=None, coin_id=None):
             model = model_from_json(fin.read())
 
     else:
-        model = Prophet()
+        model = Prophet(
+            changepoint_prior_scale=1.0,
+            seasonality_prior_scale=0.01,
+            holidays_prior_scale=0.01,
+            seasonality_mode="multiplicative",
+            daily_seasonality=False,
+            weekly_seasonality=False,
+            yearly_seasonality=False,
+        )
         model.fit(df)
 
     # Generate future dates to predict
