@@ -103,7 +103,13 @@ def detail(request):
     import yfinance as yf
     import json
     from django.contrib import messages
-    from .models import Cryptocurrencies, CoinCategory
+    from .models import (
+        Cryptocurrencies,
+        CoinCategory,
+        LSTMModel,
+        ProphetModel,
+        NHitsModel,
+    )
     from datetime import datetime
     import pandas as pd
 
@@ -112,6 +118,9 @@ def detail(request):
 
         if Cryptocurrencies.objects.filter(symbol=symbol).exists():
             coin = Cryptocurrencies.objects.filter(symbol=symbol).get()
+            lstmInfo = LSTMModel.objects.filter(name=coin.lstmId).get()
+            prophetInfo = ProphetModel.objects.filter(name=coin.prophetId).get()
+            nhitsInfo = NHitsModel.objects.filter(name=coin.nhitsId).get()
             currentDate = timezone.now().date()
             lastUpdated = coin.updateDateTime.date()
 
@@ -130,6 +139,9 @@ def detail(request):
                     "prices": json.dumps(prices),
                     "info": coin_info,
                     "coinId": coin_info.id,
+                    "lstmInfo": lstmInfo,
+                    "prophetInfo": prophetInfo,
+                    "nhitsInfo": nhitsInfo,
                 }
             else:
                 data = yf.download(symbol)
@@ -151,6 +163,9 @@ def detail(request):
                     "prices": json.dumps(prices),
                     "info": coin_info,
                     "coinId": coin_info.id,
+                    "lstmInfo": lstmInfo,
+                    "prophetInfo": prophetInfo,
+                    "nhitsInfo": nhitsInfo,
                 }
 
             return render(request, "core/detail.html", context=context)

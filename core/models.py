@@ -86,7 +86,7 @@ class Cryptocurrencies(models.Model):
     prophetId = models.ForeignKey(
         ProphetModel, on_delete=models.CASCADE, blank=True, null=True
     )
-    NhitsId = models.ForeignKey(
+    nhitsId = models.ForeignKey(
         NHitsModel, on_delete=models.CASCADE, blank=True, null=True
     )
     updateDateTime = models.DateTimeField(auto_now=True)
