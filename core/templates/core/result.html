@@ -28,12 +28,22 @@
       <canvas id="myChart"></canvas>
     </div>
   </div>  
-    <div class="w-4/12 mt-10">
-        <div class="flex flex-col items-start ml-6">
-            <a href="{{ request.META.HTTP_REFERER }}" class="mt-6 text-white underline">Go Back</a>
-        </div>
-    </div>  
-  </div>
+  <div class="w-4/12 mt-10">
+    <div class="flex flex-col items-center">
+      <div class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+        <p class="text-2xl text-white font-semibold mb-4">
+          Recommended Action:
+          {% if last_predicted_price > last_price %}
+          <span class="text-green-500">Buy</span>
+          {% else %}
+          <span class="text-red-500">Sell</span>
+          {% endif %}
+        </p>
+        <a href="{% url 'core:search' %}" class="block text-white w-1/2 bg-base-red align-middle rounded-md px-4 py-2 text-lg mt-4 mx-auto text-center font-semibold">Go Back</a>
+      </div>
+    </div>
+  </div>  
+</div>
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

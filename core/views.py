@@ -6,9 +6,14 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.db import transaction
 from django.utils import timezone
 from django.http import HttpResponse
+from django.urls import reverse
 
 
 # Create your views here.
+
+
+def termsandconditions(request):
+    return render(request, "core/termsandconditions.html")
 
 
 def login_view(request):

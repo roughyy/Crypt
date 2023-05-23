@@ -6,7 +6,6 @@ from .models import *
 
 
 admin.site.register(PersonalPrediction)
-admin.site.register(UserHistory)
 admin.site.register(CoinCategory)
 admin.site.register(LSTMModel)
 admin.site.register(ProphetModel)

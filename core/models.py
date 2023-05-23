@@ -23,11 +23,6 @@ class PersonalPrediction(models.Model):
         return self.CSVFile.name
 
 
-class UserHistory(models.Model):
-    userId = models.ForeignKey(User, on_delete=models.CASCADE)
-    predictionId = models.ForeignKey(PersonalPrediction, on_delete=models.CASCADE)
-
-
 class CoinCategory(models.Model):
     category = models.CharField(max_length=30)
 

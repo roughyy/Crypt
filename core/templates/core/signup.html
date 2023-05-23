@@ -52,10 +52,10 @@
                     <div class="flex items-center h-5">
                         <input id="remember" type="checkbox" value="" class="px-4 py-4 border-black" required>
                     </div>
-                    <label for="remember" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">I Agree to <a class="text-blue-700" href="#">terms & conditions</a> </label>
+                    <label for="remember" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">I Agree to <a class="text-blue-700" href="{% url 'core:termsandconditions' %}">terms & conditions</a> </label>
                 </div>
                 <button class="px-5 py-3 rounded-lg w-96 bg-base-red text-white font-semibold">Submit</button>
-                <p class="text-white mt-4">Already have an account?<a href="{% url 'core:login' %}" class="text-base-purple">Click here</a></p>
+                <p class="text-white mt-4">Already have an account?<a href="{% url 'core:login' %}" class="text-base-red"> Click here</a></p>
             </form>        
         </div>
         <div class="bg-base-dark w-7/12 flex items-center justify-center">

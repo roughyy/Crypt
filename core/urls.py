@@ -13,6 +13,7 @@ urlpatterns = [
     path("signup/", views.signup, name="signup"),
     path("logout/", views.logoutUser, name="logout"),
     path("profile/", views.profile, name="profile"),
+    path("termsandconditions/", views.termsandconditions, name="termsandconditions"),
     path("result/", views.result, name="result"),
     path(
         "pastPrediction/<int:personal_prediction_id>/",

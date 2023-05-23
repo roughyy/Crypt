@@ -58,14 +58,14 @@
                   <td class="px-6 py-4 inline-flex text-xl font-semibold text-white">
                       ${{ currency.lastPrice|floatformat:2|intcomma }}
                   </td>
-                  <td class="px-6 py-4 text-xl font-semibold {% if item.regularMarketChangePercent > 0 %}text-green-500{% else %}text-red-500{% endif %}">
+                  <td class="px-6 py-4 text-xl font-semibold {% if currency.PercentChange > 0 %}text-green-500{% else %}text-red-500{% endif %}">
                       {{ currency.PercentChange|floatformat:2|intcomma }} %
                   </td>
                   <td class="px-6 py-4">
                       <form action="{% url 'core:detail' %}" method="post">
                           {% csrf_token %}
                           <input type="hidden" name="symbol" value="{{ currency.symbol }}">
-                          <button type="submit" class="font-medium text-green-400 hover:underline">View</button>
+                          <button type="submit" class="font-medium text-white hover:underline rounded-md bg-base-red px-4 py-2">View</button>
                       </form>
                   </td>
               </tr>
