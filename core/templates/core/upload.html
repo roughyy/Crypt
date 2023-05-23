@@ -3,6 +3,11 @@
 {% block title %} Home {% endblock %} 
 
 {% block content %}
+
+<div class="w-full text-white text-4xl font-semibold text-center my-20">
+  <p>Upload your data here</p>
+</div>
+
 <form id="upload-form" action="{% url 'core:upload' %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="w-full flex justify-center items-center">
@@ -24,6 +29,14 @@
     <button type="submit" id="submit-button" disabled>Submit</button>
   </form>
   
+  <div class="w-full text-white text-sm text-center my-10">
+    <p>Please make sure the csv file have this spesification :</p>
+    <p>Time column named : 'timestamp'</p>
+    <p>Value column named : 'Close'</p>
+    <p>Or download use data from <a href="https://www.coinmarketcap.com" target="_blank" class="font-serif text-base-red">coinmarketcap.com</a></p>
+    
+  </div>
+
   <script>
     const fileInput = document.querySelector('input[type="file"]');
     const submitButton = document.querySelector('#submit-button');

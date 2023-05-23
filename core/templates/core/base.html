@@ -14,15 +14,15 @@
 	<body class="bg-base-dark">
         <nav class="py-6 px-6 flex justify-between items-center">
             <a href="/" class="text-3xl font-semibold text-white mx-6">Crypt</a>
-            <div class="flex-1 space-x-6 items-center text-center">
+            <div class="flex-1 flex justify-center items-center space-x-6">
               <a href="{% url 'core:search' %}" class="text-lg font-semibold text-white transition-all hover:text-purple-600">Search</a>
               <a href="{% url 'core:upload' %}" class="text-lg font-semibold text-white transition-all hover:text-purple-600">Upload</a>
-              <a href="{% url 'core:about' %}" class="text-lg font-semibold text-white transition-all hover:text-purple-600">About US</a>
-            </div>
+              <a href="{% url 'core:about' %}" class="text-lg font-semibold text-white transition-all hover:text-purple-600">About Us</a>
+          </div>
             <div class="ml-auto space-x-6">
               {% if request.user.is_authenticated %}
               
-                <div x-data="{ open: false }" class="bg-white dark:bg-base-dark w-64  flex justify-center items-center">
+                <div x-data="{ open: false }" class="bg-white dark:bg-base-dark w-44  flex justify-center items-center">
                     <div @click="open = !open" class="relative border-b-4 border-transparent py-3" :class="{'border-indigo-700 transform transition duration-300 ': open}" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100">
                       <div class="flex justify-center items-center space-x-3 cursor-pointer">
                         <div class="w-12 h-12 rounded-full overflow-hidden border-2 dark:border-white border-gray-900">
