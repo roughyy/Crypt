@@ -380,7 +380,7 @@ def result(request):
 
 
 @login_required(login_url="core:login")
-def profile(request):
+def dashboard(request):
     from .models import PersonalPrediction
     import json
     import datetime
@@ -477,9 +477,9 @@ def profile(request):
                 "list_predictions": list_predictions,
             }
 
-        return render(request, "core/profile.html", context=context)
+        return render(request, "core/dashboard.html", context=context)
 
-    return render(request, "core/profile.html")
+    return render(request, "core/dashboard.html")
 
 
 def pastPrediction(request, personal_prediction_id):

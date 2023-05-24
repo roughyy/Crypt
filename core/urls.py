@@ -12,7 +12,7 @@ urlpatterns = [
     path("login/", views.login_view, name="login"),
     path("signup/", views.signup, name="signup"),
     path("logout/", views.logoutUser, name="logout"),
-    path("profile/", views.profile, name="profile"),
+    path("dashboard/", views.dashboard, name="dashboard"),
     path("termsandconditions/", views.termsandconditions, name="termsandconditions"),
     path("result/", views.result, name="result"),
     path(
