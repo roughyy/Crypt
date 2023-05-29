@@ -1840,16 +1840,19 @@ video {
     justify-content: flex-start;
   }
 
-  .md\:text-right {
-    text-align: right;
-  }
-
   .md\:text-4xl {
     font-size: 2.25rem;
     line-height: 2.5rem;
   }
 
   .md\:text-7xl {
+    font-size: 4.5rem;
+    line-height: 1;
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg\:text-7xl {
     font-size: 4.5rem;
     line-height: 1;
   }

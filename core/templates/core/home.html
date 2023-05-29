@@ -5,13 +5,13 @@
 {% block content %}
 <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div class="flex flex-col justify-center items-center md:items-end">
-        <h1 class="text-4xl md:text-7xl font-bold text-white leading-snug text-center md:text-right">
+<div class="grid grid-cols-1">
+    <div class="flex flex-col justify-center items-center">
+        <h1 class="text-4xl lg:text-7xl font-bold text-white leading-snug text-center">
             Get ahead of the game<br>with our cryptocurrency<br>price prediction website<br>powered by data
         </h1>
     </div>
-    <div class="flex justify-center items-start">
+    <div class="flex justify-center">
         <lottie-player
             src="https://assets2.lottiefiles.com/packages/lf20_bgPRxReSyJ.json"
             background="transparent"
@@ -22,7 +22,7 @@
         ></lottie-player>
     </div>
 </div>
-<div class="flex justify-center md:justify-start my-4 md:ml-24">
+<div class="flex justify-center my-4">
     <a href="{% url 'core:search' %}" class="bg-gradient-to-r from-rose-700 to-purple-600 hover:from-purple-600 hover:to-rose-700 hover:text-white text-stone-900 font-bold text-xl md:text-4xl rounded-full py-5 px-6 transition-all duration-500">
         Get Started
     </a>
