@@ -16,19 +16,20 @@ Follow the instructions below to set up and run the project on UNIX devices.
 1. Clone the repository from GitHub.
 
 ```bash
-git clone https://github.com/your-username/your-repository.git
+git clone https://github.com/roughyy/Crypt.git
 ```
 
 2. Install the required Python packages using pip.
 
 ```bash
-pip install django neuralprophet
+pip install -r /path/to/requirements.txt
 ```
 
 3. Edit the `forecast.py` file to modify the `set_posix_windows()` function for UNIX devices.
 
 ```python
-# Add instructions for UNIX devices here
+    with set_posix_windows(): #just remove or comment this part of the code 
+        model = torch.load(model_path)
 ```
 
 ### Running the Project
@@ -52,6 +53,3 @@ This project was developed as the final project for the University. You can find
 ## Contact Information
 If you have any questions or feedback regarding the project, feel free to email me at muhammad.rafii.haditomo@gmail.com. I would be happy to assist you.
 
----
-
-*Please note that this README.md template is just a guideline. You may need to modify it according to your specific project's structure and requirements.*
