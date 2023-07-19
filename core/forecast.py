@@ -95,7 +95,7 @@ def forecast_lstm(dates, prices, coinId):
     model_path = str(lstmModel.machineLearningModel.path)
     print(model_path)
 
-    with set_posix_windows():
+    with set_posix_windows(): #remove if running on unix devices 
         model = torch.load(model_path)
 
     df = pd.DataFrame({"ds": dates, "y": prices})
@@ -126,7 +126,7 @@ def forecast_NHits(dates, prices, coinId):
     nHitsModel = NHitsModel.objects.get(id=NhitsId)
     model_path = str(nHitsModel.machineLearningModel.path)
 
-    with set_posix_windows():
+    with set_posix_windows(): #remove if running on unix devices 
         model = torch.load(model_path)
 
     df = pd.DataFrame({"ds": dates, "y": prices})
