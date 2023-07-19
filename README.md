@@ -1,43 +1,57 @@
-# Crypt
+# Project Name: Cryptocurrency Price Prediction Web Application
 
-used library (node) 
--tailwind
+## Overview
+This project is a web application that enables users to predict cryptocurrency prices using the Django framework and utilizes tailwind CSS for styling. The core forecasting functionality is powered by the "Neural Prophet" library. More information about Neural Prophet can be found in the official documentation [here](https://nixtla.github.io/neuralforecast/).
 
-(python)
-appdirs==1.4.4
-asgiref==3.6.0
-autopep8==2.0.2
-beautifulsoup4==4.12.2
-certifi==2022.12.7
-cffi==1.15.1
-charset-normalizer==3.1.0
-contourpy==1.0.7
-cryptography==40.0.1
-cycler==0.11.0
-Django==4.2
-fonttools==4.39.3
-frozendict==2.3.7
-html5lib==1.1
-idna==3.4
-kiwisolver==1.4.4
-lxml==4.9.2
-matplotlib==3.7.1
-multitasking==0.0.11
-numpy==1.24.2
-packaging==23.0
-pandas==2.0.0
-Pillow==9.5.0
-pycodestyle==2.10.0
-pycparser==2.21
-pyparsing==3.0.9
-python-dateutil==2.8.2
-pytz==2023.3
-requests==2.28.2
-six==1.16.0
-soupsieve==2.4
-sqlparse==0.4.3
-tzdata==2023.3
-urllib3==1.26.15
-webencodings==0.5.1
-yfinance==0.2.14
+## Getting Started
+Follow the instructions below to set up and run the project on UNIX devices.
 
+### Prerequisites
+- Python 3.x
+- Django
+- Neural Prophet
+- Tailwind CSS
+
+### Installation
+1. Clone the repository from GitHub.
+
+```bash
+git clone https://github.com/your-username/your-repository.git
+```
+
+2. Install the required Python packages using pip.
+
+```bash
+pip install django neuralprophet
+```
+
+3. Edit the `forecast.py` file to modify the `set_posix_windows()` function for UNIX devices.
+
+```python
+# Add instructions for UNIX devices here
+```
+
+### Running the Project
+1. Navigate to the project directory.
+
+```bash
+cd your-project-directory
+```
+
+2. Start the Django development server.
+
+```bash
+python manage.py runserver
+```
+
+3. Access the web application in your web browser at `http://localhost:8000/`.
+
+## Final Project at University
+This project was developed as the final project for the University. You can find more detailed information about the project and its documentation on the University's website at [https://kc.umn.ac.id/26151/](https://kc.umn.ac.id/26151/).
+
+## Contact Information
+If you have any questions or feedback regarding the project, feel free to email me at muhammad.rafii.haditomo@gmail.com. I would be happy to assist you.
+
+---
+
+*Please note that this README.md template is just a guideline. You may need to modify it according to your specific project's structure and requirements.*
