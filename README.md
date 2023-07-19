@@ -1,4 +1,4 @@
-# Project Name: Cryptocurrency Price Prediction Web Application
+# Project Name: Django Cryptocurrency Price Prediction Web Application
 
 ## Overview
 This project is a web application that enables users to predict cryptocurrency prices using the Django framework and utilizes tailwind CSS for styling. The core forecasting functionality is powered by the "Neural Prophet" library. More information about Neural Prophet can be found in the official documentation [here](https://nixtla.github.io/neuralforecast/).
